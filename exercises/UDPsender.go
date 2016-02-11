@@ -11,7 +11,7 @@ import (
 func main() {
 
 	//set up send-socket
-	remote_addr, _ := net.ResolveUDPAddr("udp", "129.241.187.255:20015") //using 15 because of workspace
+	remote_addr, _ := net.ResolveUDPAddr("udp", "255.255.255.255:20015") //using 15 because of workspace
 	socket_send, err := net.DialUDP("udp", nil, remote_addr)
 
 	if err != nil {
