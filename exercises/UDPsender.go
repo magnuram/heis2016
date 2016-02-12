@@ -16,15 +16,17 @@ func CheckError(err error) { // error function
 
 func main() {
 
+	//net.UDPConn("")
 	//set up send-socket
-	remote_addr, _ := net.ResolveUDPAddr("udp", "255.255.255.255:20015") //129.241.187.255 using 15 because of workspace
+	remote_addr, _ := net.ResolveUDPAddr("udp", "129.241.187.255:20018") //129.241.187.255 using 15 because of workspace
 	socket_send, err := net.DialUDP("udp", nil, remote_addr)
 	CheckError(err)
 
 	//set up a listen-socket
-	port, _ := net.ResolveUDPAddr("udp", ":20015")
+	port, _ := net.ResolveUDPAddr("udp", ":20018")
 	socket_listen, err := net.ListenUDP("udp", port)
 	CheckError(err)
+
 	//close sockets when done
 	defer socket_listen.Close()
 	defer socket_send.Close()
