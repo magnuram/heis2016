@@ -8,35 +8,34 @@ import (
 	"time"
 )
 
+func CheckError(err error) { // error function
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
 
 	//set up send-socket
-	remote_addr, _ := net.ResolveUDPAddr("udp", "255.255.255.255:20015") //using 15 because of workspace
+	remote_addr, _ := net.ResolveUDPAddr("udp", "255.255.255.255:20015") //129.241.187.255 using 15 because of workspace
 	socket_send, err := net.DialUDP("udp", nil, remote_addr)
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	CheckError(err)
 
 	//set up a listen-socket
-	port, _ := net.ResolveUDPAddr(("udp"), ":20015")
+	port, _ := net.ResolveUDPAddr("udp", ":20015")
 	socket_listen, err := net.ListenUDP("udp", port)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	CheckError(err)
 	//close sockets when done
 	defer socket_listen.Close()
 	defer socket_send.Close()
 
 	for {
 		//Send message
-		msg := "Hello server"
+		msg := "hei server"
 		socket_send.Write([]byte(msg))
 
 		//Listen to message
-		var buffer [64]byte
+		var buffer [1024]byte //64
 		length, addr, err := socket_listen.ReadFromUDP(buffer[:])
 		log.Println(length)
 		log.Println(addr)
