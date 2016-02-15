@@ -10,6 +10,7 @@ package driver
 import (
 	"C"
 	"log"
+	"time"
 )
 
 const (
@@ -24,11 +25,14 @@ const (
 	BUTTON_COMMAND   = 2
 )
 
+const elevStopDelay = 50 * time.Millisecond
+
 //Motor commands
+
 const (
-	DIRN_DOWN = -1
-	DIRN_STOP = 0
-	DIRN_UP   = 1
+	DOWN = -1
+	STOP = 0
+	UP   = 1
 )
 
 type ElevButton struct {
@@ -56,13 +60,172 @@ var buttonChannelMatrix = [N_FLOORS][N_BUTTONS]int{
 	{BUTTON_UP4, BUTTON_DOWN4, BUTTON_COMMAND4},
 }
 
-func ElevInit(buttonChannel chan<- ElevButton, lightChannel <-chan ElevLight) error {
+func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, motorChannel chan int, floorChannel chan<- int, elevDelay time.Duration) error {
 	//init the hardware
 	if err := IoInit(); err != nil {
 		log.Println("in ElevInit():\t IoInit() ERROR")
 		return err
 	}
 
+	clearAlllights()
+	go lightCheck(lightChannel)
+	go ElevSetMotorDirection(motorChannel)
+	if getFloorSensorSignal() == -1 {
+		motorChannel <- DOWN
+		for {
+			if getFloorSensorSignal() != -1 {
+				motorChannel <- STOP
+				break
+			} else {
+				time.sleep(elevDelay)
+			}
+		}
+	}
+	go readInput(buttonchannel, elevDelay)
+	go readFloorSensor(floorChannel, elevDelay)
+	return nil
+}
+
+func lightCheck(lightChannel <-chan ElevLight) {
+	var cmd ElevLight
+	for {
+		select {
+		case cmd = <-lightChannel:
+			switch cmd.Type {
+			case BUTTON_STOP:
+				if cmd.Active {
+					IoSetBit(LIGHT_STOP)
+				} else {
+					IoClearBit(LIGHT_STOP)
+				}
+			case BUTTON_CALL_UP, BUTTON_CALL_DOWN, BUTTON_COMMAND:
+				if cmd.Active {
+					IoSetBit(lampChannelMatrix[cmd.Floor][cmd.Type])
+				} else {
+					IoClearBit(lampChannelMatrix[cmd.Floor][cmd.Type])
+				}
+			case INDICATOR_DOOR:
+				if cmd.Active {
+					IoSetBit(LIGHT_DOOR_OPEN)
+				} else {
+					IoClearBit(LIGHT_DOOR_OPEN)
+				}
+			default:
+				log.Println("Elev: \t You tried to light a non light item")
+			}
+		}
+
+	}
+}
+
+func elevSetMotorDirection(motorChannel <-chan int) {
+	for {
+		select {
+		case cmd := <-motorChannel:
+			switch cmd {
+			case STOP:
+				time.sleep(elevatorStopDelay)
+				IoWriteAnalog(MOTOR, 0)
+			case UP:
+				IoClearBit(MOTORDIR)
+				IoWriteAnalog(MOTOR, 2800)
+			case DOWN:
+				IoClearBit(MOTORDIR)
+				IoWriteAnalog(MOTOR, 2800)
+			default:
+				log.Println("Elev: \t invalid motor command: ", cmd)
+			}
+		}
+	}
+}
+
+func readInput(buttonchannel chan<- ElevButton, elevdelay time.Duration) {
+	inputMatrix := [N_FLOORS][N_BUTTONS]bool{}
+	var stopbtn bool = false
+	for {
+		for Type := BUTTON_CALL_UP; Type <= BUTTON_COMMAND; Type++ {
+			for Floor := 0; Floor < N_FLOORS; Floor++ {
+				tempbtn := IoReadBit(buttonChannelMatrix[Floor][Type])
+				if tempbtn { // button been pressed
+					if !inputMatrix[Floor][Type] {
+						inputMatrix[Floor][Type] = true
+						buttonchannel <- ElevButton{Type, Floor}
+					}
+				} else {
+					inputMatrix[Floor][Type] = false
+				}
+			}
+		}
+		if IoReadBit(STOP_BUTTON) {
+			if !stopbtn {
+				stopbtn = true
+				buttonchannel <- ElevButton{Type: BUTTON_STOP}
+			}
+		} else {
+			stopbtn = false
+		}
+		time.sleep(elevdelay)
+	}
+
+}
+
+func readFloorSensor(floorChannel chan<- int, elevDelay time.Duration) {
+	var lastFloor int = -1
+	for {
+		tempFloor := getFloorSensorSignal()
+		if (tempFloor != -1) && (tempFloor != lastFloor) {
+			lastFloor = tempFloor
+			setFloorIndicator(tempFloor)
+			floorChannel <- tempFloor
+		}
+		time.sleep(elevDelay)
+	}
+}
+
+func getFloorSensorSignal() int {
+	if IoReadBit(SENSOR_FLOOR1) {
+		return 0
+	} else if IoReadBit(SENSOR_FLOOR2) {
+		return 1
+	} else if IoReadBit(SENSOR_FLOOR3) {
+		return 2
+	} else if IoReadBit(SENSOR_FLOOR4) {
+		return 3
+	} else {
+		return -1
+	}
+}
+
+func setFloorIndicator(floor int) {
+	if floor >= N_FLOORS {
+		floor = N_FLOORS - 1
+		log.Println("Elev: \t Tried to set the light indicator to the one over", N_FLOORS-1)
+	} else if floor < 0 {
+		floor = 0
+		log.Println("Elev: \t Tried to set the light indicator to under 0")
+	}
+	if bool((floor & 0x02) != 0) {
+		IoSetBit(LIGHT_FLOOR_IND1)
+	} else {
+		IoClearBit(LIGHT_FLOOR_IND1)
+	}
+	if bool((floor & 0x01) != 0) {
+		IoSetBit(LIGHT_FLOOR_IND2)
+	} else {
+		IoClearBit(LIGHT_FLOOR_IND2)
+	}
+}
+
+func ElevGetStopSignal() bool {
+	return IoReadBit(STOP)
+}
+
+func ElevGetObstructuionSignal() bool { //not going to use
+	return IoReadBit(OBSTRUCTION)
+}
+
+//---------------------------------SubFunctions-----------------------------------------//
+func clearAlllights() {
 	//Set at floor button lamps off
 	for Type := BUTTON_CALL_UP; Type <= BUTTON_COMMAND; Type++ {
 		for floor := 0; floor < N_FLOORS; floor++ {
@@ -70,46 +233,6 @@ func ElevInit(buttonChannel chan<- ElevButton, lightChannel <-chan ElevLight) er
 		}
 	}
 	IoClearBit(LIGHT_DOOR_OPEN)
+
 	IoClearBit(LIGHT_STOP)
-
-}
-
-func ElevSetMotorDirection() {
-
-}
-
-func ElevSetButtonLamp(floor int, button int, value bool) {
-
-}
-
-func ElevSetFloorIndicator() {
-
-}
-
-func ElevSetDoorOpenLamp() {
-
-}
-
-func ElevSetStopLamp(value bool) {
-	if value {
-		IoSetBit(LIGHT_STOP)
-	} else {
-		IoClearBit(LIGHT_STOP)
-	}
-}
-
-func ElevGetButtonSignal() {
-
-}
-
-func ElevGetFloorSensorSignal() {
-
-}
-
-func ElevGetStopSignal() bool {
-	return IoReadBit(STOP)
-}
-
-func ElevGetObstructuionSignal() bool {
-	return IoReadBit(OBSTRUCTION)
 }
