@@ -4,30 +4,35 @@ package main
 import (
 	"fmt"
 	"log"
-	"runtime"
+	//"runtime"
 )
 import "./driver"
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
+	//runtime.GOMAXPROCS(runtime.NumCPU())
 	//
-	buttonChannel := make(chan driver.ElevButton, 10)
-	lightChannel := make(chan driver.ElevLight)
+	//buttonChannel := make(chan driver.ElevButton, 10)
+	//lightChannel := make(chan driver.ElevLight)
 
 	log.Println("Main: \t Start in main")
 
-	driver.ElevInit(buttonChannel, lightChannel)
+	driver.ElevInit()
 
 	fmt.Println("Press STOP button to stop the elevator and exit the program\n")
 
-	driver.ElevSetMotorDirection(DIRN_UP)
+	driver.ElevSetMotorDirection(driver.DIRN_UP)
 
 	for {
 
-		if driver.ElevGetFloorSensorSignal() == N_FLOORS-1 {
-			driver.ElevSetMotorDirection(DIRN_DOWN)
+		if driver.ElevGetFloorSensorSignal() == driver.N_FLOORS-1 {
+			driver.ElevSetMotorDirection(driver.DIRN_DOWN)
 		} else if driver.ElevGetFloorSensorSignal() == 0 {
-			driver.ElevSetMotorDirection(DIRN_UP)
+			driver.ElevSetMotorDirection(driver.DIRN_UP)
+		}
+
+		if driver.ElevGetStopSignal() {
+			driver.ElevSetMotorDirection(driver.DIRN_STOP)
+
 		}
 	}
 }
