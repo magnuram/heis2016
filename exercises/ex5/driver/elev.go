@@ -25,16 +25,20 @@ const (
 )
 
 //Motor commands
+
+type Elev_motor_dir_t int
 const (
-	DIRN_DOWN = -1
-	DIRN_STOP = 0
-	DIRN_UP   = 1
+	DIRN_DOWN Elev_motor_dir_t  = -1
+	DIRN_STOP  Elev_motor_dir_t = 0
+	DIRN_UP   Elev_motor_dir_t  = 1
 )
+
 
 type ElevButton struct {
 	Type  int
 	Floor int
 }
+
 
 type ElevLight struct {
 	Type   int
@@ -56,7 +60,7 @@ var buttonChannelMatrix = [N_FLOORS][N_BUTTONS]int{
 	{BUTTON_UP4, BUTTON_DOWN4, BUTTON_COMMAND4},
 }
 
-func ElevInit(buttonChannel chan<- ElevButton, lightChannel <-chan ElevLight) error {
+func ElevInit() error {
 	//init the hardware
 	if err := IoInit(); err != nil {
 		log.Println("in ElevInit():\t IoInit() ERROR")
@@ -70,20 +74,51 @@ func ElevInit(buttonChannel chan<- ElevButton, lightChannel <-chan ElevLight) er
 		}
 	}
 	IoClearBit(LIGHT_DOOR_OPEN)
+
 	IoClearBit(LIGHT_STOP)
 
+	return nil
 }
 
-func ElevSetMotorDirection() {
+func ElevSetMotorDirection(dirn Elev_motor_dir_t) {
+ if dirn == 0 {
+ 	IoWriteAnalog(MOTOR,0)
+ }else if dirn > 0{
+ 	IoClearBit(MOTORDIR)
+ 	IoWriteAnalog(MOTOR, 2800)
+ }else if dirn < 0{
+ 	IoSetBit(MOTORDIR)
+ 	IoWriteAnalog(MOTOR,2800)
+ }
 
 }
 
-func ElevSetButtonLamp(floor int, button int, value bool) {
-
+func ElevSetButtonLamp(value bool) {
+	if value {
+		IoSetBit(LIGHT_DOOR_OPEN)
+	} else{
+		IoClearBit(LIGHT_DOOR_OPEN)
+	}
 }
 
-func ElevSetFloorIndicator() {
-
+func ElevSetFloorIndicator(floor int) {
+	if floor >= N_FLOORS{
+		floor = N_FLOORS - 1
+		log.Println("Elev: \t Tried to set the light indicator to the one over", N_FLOORS-1)
+	}else if floor < 0 {
+		floor = 0
+		log.Println("Elev: \t Tried to set the light indicator to under 0")
+	}
+	if bool((floor & 0x02) != 0){
+		IoSetBit(LIGHT_FLOOR_IND1)
+	} else{
+		IoClearBit(LIGHT_FLOOR_IND1)
+	}
+	if bool((floor & 0x01) != 0){
+		IoSetBit(LIGHT_FLOOR_IND2)
+	}else{
+		IoClearBit(LIGHT_FLOOR_IND2)
+	}
 }
 
 func ElevSetDoorOpenLamp() {
@@ -102,8 +137,16 @@ func ElevGetButtonSignal() {
 
 }
 
-func ElevGetFloorSensorSignal() {
-
+func ElevGetFloorSensorSignal() int {
+	if IoReadBit(SENSOR_FLOOR1){
+		return 0
+	}else if IoReadBit(SENSOR_FLOOR2){
+		return 1
+	}else if IoReadBit(SENSOR_FLOOR3){
+		return 2
+	}else if IoReadBit(SENSOR_FLOOR4){
+		return 3
+	}else{return -1}
 }
 
 func ElevGetStopSignal() bool {
