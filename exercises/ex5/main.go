@@ -15,9 +15,11 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	//
 
-	const elevDelay
+	const elevDelay = 50* time.Milliseconds
 
 	//_____________init hardware
+
+
 	log.Println("Main: \t Start in main")
 	buttonChannel := make(chan driver.ElevButton, 10)
 	lightChannel := make(chan driver.ElevLight)
