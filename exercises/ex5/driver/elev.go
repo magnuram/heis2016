@@ -93,14 +93,16 @@ func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, mo
 	//init the hardware
 
 	if err := IoInit(); err != nil {
-		log.Println("in ElevInit():\t IoInit() ERROR")
+		log.Println("ElevInit():\t IoInit() ERROR")
 		return err
 	}
 
 	clearAlllights()
 
 	go lightCheck(lightChannel)
+	
 	go elevSetMotorDirection(motorChannel)
+	
 	if getFloorSensorSignal() == -1 {
 		motorChannel <- DOWN
 		for {
@@ -113,6 +115,7 @@ func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, mo
 			}
 		}
 	}
+	
 	go readInput(buttonchannel, elevDelay)
 
 	go readFloorSensor(floorChannel, elevDelay)
@@ -273,3 +276,4 @@ func clearAlllights(){
 	IoClearBit(LIGHT_STOP)
 
 }
+
