@@ -8,6 +8,8 @@ import (
 	"log"
 	"runtime"
 	"time"
+	"os"
+	"os/signal"
 )
 import "./driver"
 
@@ -26,7 +28,6 @@ func main() {
 	motorChannel := make(chan int)
 	floorChannel := make(chan int)
 
-
 	if err := driver.ElevInit(buttonChannel, lightChannel, motorChannel, floorChannel, elevDelay); err != nil{
 		log.Println("ERROR -> Main: \t Hardware init failure")
 		log.Fatal(err)
@@ -34,9 +35,18 @@ func main() {
 		log.Println("Hardware init complete")
 	}
 
-	fmt.Println("Press STOP button to stop the elevator and exit the program\n")
 
-	// driver.ElevSetMotorDirection(driver.DIRN_UP)
+
+	//----------init monkey handle
+	killChannel := make(chan os.Signal)
+	signal.Notify(killChannel, os.Interrupt)
+	go func() {
+		<- killChannel
+		motorChannel <- 0
+		fmt.Println("KILLED ELEVATOR")
+		time.Sleep(100 * time.Millisecond)
+		os.Exit(1)
+	}()
 
 	//for {
 
@@ -49,8 +59,8 @@ func main() {
 		}
 */
 		//if driver.ElevGetStopSignal() {
-			//driver.ElevSetMotorDirection(driver.DIRN_STOP)
+//			driver.ElevSetMotorDirection(driver.DIRN_STOP)
 
-		//}
+//		}
 	//}
 }
