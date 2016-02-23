@@ -1,13 +1,13 @@
 //This is a test main
 package main
 
-//This is a test main
-package main
+
 
 import (
 	"fmt"
 	"log"
 	"runtime"
+	"time"
 )
 import "./driver"
 
@@ -15,7 +15,7 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	//
 
-	const elevDelay = 50* time.Milliseconds
+	const elevDelay = 50* time.Millisecond
 
 	//_____________init hardware
 
@@ -27,7 +27,7 @@ func main() {
 	floorChannel := make(chan int)
 
 
-	if err := driver.ElevInit(buttonChannel,lightChannel, floorChannel, elevDelay); err != nil{
+	if err := driver.ElevInit(buttonChannel, lightChannel, motorChannel, floorChannel, elevDelay); err != nil{
 		log.Println("ERROR -> Main: \t Hardware init failure")
 		log.Fatal(err)
 	}else{
@@ -38,7 +38,7 @@ func main() {
 
 	// driver.ElevSetMotorDirection(driver.DIRN_UP)
 
-	for {
+	//for {
 
 		
 /*			Simple up and down test
@@ -48,9 +48,9 @@ func main() {
 			driver.ElevSetMotorDirection(driver.DIRN_UP)
 		}
 */
-		if driver.ElevGetStopSignal() {
-			driver.ElevSetMotorDirection(driver.DIRN_STOP)
+		//if driver.ElevGetStopSignal() {
+			//driver.ElevSetMotorDirection(driver.DIRN_STOP)
 
-		}
-	}
+		//}
+	//}
 }
