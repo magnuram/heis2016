@@ -4,12 +4,12 @@ package main
 
 
 import (
-	"fmt"
+	//"fmt"
 	"log"
 	"runtime"
 	"time"
-	"os"
-	"os/signal"
+	//"os"
+	//"os/signal"
 )
 import "./driver"
 
@@ -36,7 +36,7 @@ func main() {
 	}
 
 
-
+/*
 	//----------init monkey handle
 	killChannel := make(chan os.Signal)
 	signal.Notify(killChannel, os.Interrupt)
@@ -47,7 +47,7 @@ func main() {
 		time.Sleep(100 * time.Millisecond)
 		os.Exit(1)
 	}()
-
+/*
 	//for {
 
 		
