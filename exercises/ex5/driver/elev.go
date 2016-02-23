@@ -12,6 +12,7 @@ import (
 	"C"
 	"log"
 	"time"
+	"math"
 
 )
 
@@ -50,15 +51,15 @@ var MotorCmd = [3]string{
 	"UP",
 }
 
-
+const maxSpeed int = 14
 const elevStopDelay = 50 * time.Millisecond
 
 //Motor commands
 
 const (
-	DOWN = -1
+	UP= 1
 	STOP = 0
-	UP   = 1
+	DOWN  = -1
 )
 
 
@@ -90,17 +91,20 @@ var buttonChannelMatrix = [N_FLOORS][3]int{
 
 func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, motorChannel chan int, floorChannel chan<- int, elevDelay time.Duration) error {
 	//init the hardware
+
 	if err := IoInit(); err != nil {
 		log.Println("in ElevInit():\t IoInit() ERROR")
 		return err
 	}
 
 	clearAlllights()
+
 	go lightCheck(lightChannel)
 	go elevSetMotorDirection(motorChannel)
 	if getFloorSensorSignal() == -1 {
 		motorChannel <- DOWN
 		for {
+		
 			if getFloorSensorSignal() != -1 {
 				motorChannel <- STOP
 				break
@@ -110,6 +114,7 @@ func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, mo
 		}
 	}
 	go readInput(buttonchannel, elevDelay)
+
 	go readFloorSensor(floorChannel, elevDelay)
 	return nil
 }
@@ -199,10 +204,10 @@ func elevSetMotorDirection(motorChannel <-chan int) {
 				IoWriteAnalog(MOTOR, 0)
 			case UP:
 				IoClearBit(MOTORDIR)
-				IoWriteAnalog(MOTOR, 2800)
+				IoWriteAnalog(MOTOR, 200*int(math.Abs(float64(maxSpeed))))
 			case DOWN:
 				IoClearBit(MOTORDIR)
-				IoWriteAnalog(MOTOR, 2800)
+				IoWriteAnalog(MOTOR, 200*int(math.Abs(float64(maxSpeed))))
 			default:
 				log.Println("Elev: \t invalid motor command: ", cmd)
 			}
@@ -246,9 +251,9 @@ func getFloorSensorSignal() int {
 
 
 
-//func ElevGetStopSignal() bool { 
-//	return IoReadBit(STOP)
-//}
+func ElevGetStopSignal() bool { 
+	return IoReadBit(STOP_BUTTON)
+}
 
 func ElevGetObstructuionSignal() bool { //not going to use
 	return IoReadBit(OBSTRUCTION)
@@ -259,11 +264,12 @@ func ElevGetObstructuionSignal() bool { //not going to use
 func clearAlllights(){
 		//Set at floor button lamps off
 	for Type := BUTTON_CALL_UP; Type <= BUTTON_COMMAND; Type++ {
-		for floor := 0; floor < N_FLOORS; floor++ {
-			IoClearBit(lampChannelMatrix[floor][Type])
+		for Floor := 0; Floor < N_FLOORS; Floor++ {
+			IoClearBit(lampChannelMatrix[Floor][Type])
 		}
 	}
 	IoClearBit(LIGHT_DOOR_OPEN)
 
 	IoClearBit(LIGHT_STOP)
+
 }
