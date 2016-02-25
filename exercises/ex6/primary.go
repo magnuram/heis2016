@@ -13,7 +13,7 @@ func errorHandler(err error) {
 }
 
 func primary(start int) {
-	udpAddr, err := net.ResolveUDPAddr("udp", "129.241.187.255:20063")
+	udpAddr, err := net.ResolveUDPAddr("udp", "129.241.187.255:20063") //port 15 e føkked => 63
 	errorHandler(err)
 
 	udpBroadcast, err := net.DialUDP("udp", nil, udpAddr)
@@ -32,5 +32,5 @@ func primary(start int) {
 }
 
 func main() {
-	primary(1)
+	primary(1) //start verdi 1
 }
