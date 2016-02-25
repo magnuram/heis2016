@@ -1,19 +1,10 @@
 package driver
 
-/*
-#cgo CFLAGS: -std=c11
-#cgo LDFLAGS: -lcomedi -lm
-#include "elev.h"
-#include "elev.c"
-
-*/
-
 import (
-	"C"
+	//"C"
 	"log"
-	"time"
 	"math"
-
+	"time"
 )
 
 const (
@@ -21,24 +12,23 @@ const (
 	N_BUTTONS = 3 //Number of buttons/lamps on a per-floor basis
 )
 
-
 //
 const (
-	BUTTON_CALL_UP   = iota 
-	BUTTON_CALL_DOWN 
-	BUTTON_COMMAND   
-	SENSOR_FLOOR 
+	BUTTON_CALL_UP = iota
+	BUTTON_CALL_DOWN
+	BUTTON_COMMAND
+	SENSOR_FLOOR
 	INDICATOR_FLOOR
 	BUTTON_STOP
 	SENSOR_OBST
 	INDICATOR_DOOR
 )
 
-var ButtonType =[]string{
-	"BUTTON_CALL_UP", 
-	"BUTTON_CALL_DOWN", 
-	"BUTTON_COMMAND",   
-	"SENSOR_FLOOR", 
+var ButtonType = []string{
+	"BUTTON_CALL_UP",
+	"BUTTON_CALL_DOWN",
+	"BUTTON_COMMAND",
+	"SENSOR_FLOOR",
 	"INDICATOR_FLOOR",
 	"BUTTON_STOP",
 	"SENSOR_OBST",
@@ -57,17 +47,15 @@ const elevStopDelay = 50 * time.Millisecond
 //Motor commands
 
 const (
-	UP= 1
+	UP   = 1
 	STOP = 0
-	DOWN  = -1
+	DOWN = -1
 )
-
 
 type ElevButton struct {
 	Type  int
 	Floor int
 }
-
 
 type ElevLight struct {
 	Type   int
@@ -100,13 +88,13 @@ func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, mo
 	clearAlllights()
 
 	go lightCheck(lightChannel)
-	
+
 	go elevSetMotorDirection(motorChannel)
-	
+
 	if getFloorSensorSignal() == -1 {
 		motorChannel <- DOWN
 		for {
-		
+
 			if getFloorSensorSignal() != -1 {
 				motorChannel <- STOP
 				break
@@ -115,7 +103,7 @@ func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, mo
 			}
 		}
 	}
-	
+
 	go readInput(buttonchannel, elevDelay)
 
 	go readFloorSensor(floorChannel, elevDelay)
@@ -148,8 +136,7 @@ func readInput(buttonchannel chan<- ElevButton, elevDelay time.Duration) {
 			stopbtn = false
 		}
 		time.Sleep(elevDelay)
-}
-
+	}
 
 }
 func readFloorSensor(floorChannel chan<- int, elevDelay time.Duration) {
@@ -209,7 +196,7 @@ func elevSetMotorDirection(motorChannel <-chan int) {
 				IoClearBit(MOTORDIR)
 				IoWriteAnalog(MOTOR, 200*int(math.Abs(float64(maxSpeed))))
 			case DOWN:
-				IoClearBit(MOTORDIR)
+				IoSetBit(MOTORDIR)
 				IoWriteAnalog(MOTOR, 200*int(math.Abs(float64(maxSpeed))))
 			default:
 				log.Println("Elev: \t invalid motor command: ", cmd)
@@ -218,43 +205,41 @@ func elevSetMotorDirection(motorChannel <-chan int) {
 	}
 }
 
-
 func setFloorIndicator(floor int) {
-	if floor >= N_FLOORS{
+	if floor >= N_FLOORS {
 		floor = N_FLOORS - 1
 		log.Println("Elev: \t Tried to set the light indicator to the one over", N_FLOORS-1)
-	}else if floor < 0 {
+	} else if floor < 0 {
 		floor = 0
 		log.Println("Elev: \t Tried to set the light indicator to under 0")
 	}
-	if bool((floor & 0x02) != 0){
+	if floor&0x02 > 0 { //floor&0x02 > 0 | bool((floor & 0x02) != 0)
 		IoSetBit(LIGHT_FLOOR_IND1)
-	} else{
+	} else {
 		IoClearBit(LIGHT_FLOOR_IND1)
 	}
-	if bool((floor & 0x01) != 0){
+	if floor&0x01 > 0 { // floor&0x01 > 0 | bool((floor & 0x01) != 0)
 		IoSetBit(LIGHT_FLOOR_IND2)
-	}else{
-
+	} else {
 		IoClearBit(LIGHT_FLOOR_IND2)
 	}
 }
 
 func getFloorSensorSignal() int {
-		if IoReadBit(SENSOR_FLOOR1) {
-				return 0
-		}else if IoReadBit(SENSOR_FLOOR2){
-			return 1
-		}else if IoReadBit(SENSOR_FLOOR3){
-			return 2
-		}else if IoReadBit(SENSOR_FLOOR4){
-			return 3
-		}else{return -1}
+	if IoReadBit(SENSOR_FLOOR1) {
+		return 0
+	} else if IoReadBit(SENSOR_FLOOR2) {
+		return 1
+	} else if IoReadBit(SENSOR_FLOOR3) {
+		return 2
+	} else if IoReadBit(SENSOR_FLOOR4) {
+		return 3
+	} else {
+		return -1
+	}
 }
 
-
-
-func ElevGetStopSignal() bool { 
+func ElevGetStopSignal() bool {
 	return IoReadBit(STOP_BUTTON)
 }
 
@@ -262,11 +247,10 @@ func ElevGetObstructuionSignal() bool { //not going to use
 	return IoReadBit(OBSTRUCTION)
 }
 
-
 //---------------------------------SubFunctions-----------------------------------------//
-func clearAlllights(){
-		//Set at floor button lamps off
-	for Type := BUTTON_CALL_UP; Type <= BUTTON_COMMAND; Type++ {
+func clearAlllights() {
+	//Set at floor button lamps off
+	for Type := BUTTON_CALL_UP; Type <= BUTTON_COMMAND; Type++ { //buttonCallUp = 1 Button_command = 3
 		for Floor := 0; Floor < N_FLOORS; Floor++ {
 			IoClearBit(lampChannelMatrix[Floor][Type])
 		}
@@ -276,4 +260,3 @@ func clearAlllights(){
 	IoClearBit(LIGHT_STOP)
 
 }
-
