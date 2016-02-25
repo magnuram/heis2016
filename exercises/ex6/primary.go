@@ -21,10 +21,10 @@ func primary(start int) {
 
 	msg := make([]byte, 1)
 
-	for i := start; ; i++ {
+	for i := start; ; i++ { //Telleren
 		log.Println(i)
 		msg[0] = byte(i)
-		udpBroadcast.Write(msg)
+		udpBroadcast.Write(msg) //sender verdien via udp
 		time.Sleep(200 * time.Millisecond)
 	}
 
