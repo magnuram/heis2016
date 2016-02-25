@@ -35,7 +35,7 @@ func backup(udpListen *net.UDPConn) int{
 				time.Sleep(50*time.Millisecond)
 				break
 			case <-time.After(1*time.Second):
-				log.Println("The primary is dead, long live the primary")
+				log.Println("The primary died, initiating backup")
 				return backupvalue
 		}
 	}
