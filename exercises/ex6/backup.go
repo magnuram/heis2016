@@ -1,84 +1,91 @@
 package main
 
-import(
+import (
+	"encoding/binary"
 	"log"
 	"net"
-	"time"
-	"encoding/binary"
 	"os/exec"
+	"time"
 )
 
-func primary(start int, udpBroadcast *net.UDPConn){
+func errorHandler(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
-	newBackup := exec.Command("gnome-terminal", "-x", "sh", "-c", "go run backup.go")
-	err := newBackup.Run()
-	if err != nil {log.Fatal(err)}
+func primary(start int, udpBroadcast *net.UDPConn) {
+
+	startNew()
 
 	msg := make([]byte, 1)
 
-	for i := start;; i++{
+	for i := start; ; i++ {
 		log.Println(i)
-		msg[0] = byte(i);
+		msg[0] = byte(i)
 		udpBroadcast.Write(msg)
-		time.Sleep(100*time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 	}
-	
+
+	udpBroadcast.Close()
 }
 
-func backup(udpListen *net.UDPConn) int{
-	listenChan := make(chan int, 1); 
+func startNew() {
+	newBackup := exec.Command("gnome-terminal", "-x", "sh", "-c", "go run backup.go") //setter opp en nytt vindu
+	err := newBackup.Run()
+	errorHandler(err)
+}
+
+func backup(udpListen *net.UDPConn) int {
+	listenChn := make(chan int, 1)
 	backupvalue := 0
-	go listen(listenChan, udpListen)
+	go listenFromUdp(listenChn, udpListen) //Kjører en goroutine som vil lese det som sendes fra primary
 	for {
 		select {
-			case backupvalue = <- listenChan:
-				time.Sleep(50*time.Millisecond)
-				break
-			case <-time.After(1*time.Second):
-				log.Println("The primary died, initiating backup")
-				return backupvalue
+		case backupvalue = <-listenChn: // setter verdien i channel til backupverdien
+			time.Sleep(100 * time.Millisecond)
+			break
+		case <-time.After(1 * time.Second): // Om tiden går lengre enn 1 sek vil den opprette en ny
+			log.Println("The primary died, initiating backup")
+			return backupvalue
 		}
 	}
-	
-	
+
 }
 
-func listen(listenChan chan int, udpListen *net.UDPConn) {
+func listenFromUdp(listenChn chan int, udpListen *net.UDPConn) {
 
-	buffer := make([]byte, 1024)
+	buff := make([]byte, 8)
 
 	for {
-		udpListen.ReadFromUDP(buffer[:])
-		//if err != nil {log.Fatal(err)} 
-		
-		listenChan <- int(binary.LittleEndian.Uint64(buffer)) //convert an bytearray to int
-		time.Sleep(100*time.Millisecond)
+		udpListen.ReadFromUDP(buff[:]) //Leser av buffer sendt på udp
+
+		listenChn <- int(binary.LittleEndian.Uint64(buff)) //Konverterer bytearray til int og plasserer inn i channel
+		time.Sleep(100 * time.Millisecond)
 	}
-	
+
 }
 
 func main() {
-	
-	udpAddr, err := net.ResolveUDPAddr("udp", ":20015")
-	if err != nil {log.Fatal(err)}
+
+	udpAddr, err := net.ResolveUDPAddr("udp", ":20063")
+	errorHandler(err)
 
 	udpListen, err := net.ListenUDP("udp", udpAddr)
-	if err != nil {log.Fatal(err)}
-	
-	backupvalue := backup(udpListen)
-	
+	errorHandler(err)
+
+	backupvalue := backup(udpListen) // Får ut backup verdi om d går lengre enn 1 sek
+
 	udpListen.Close()
-	
-	udpAddr, err = net.ResolveUDPAddr("udp","129.241.187.255:20015")
-	if err != nil {log.Fatal(err)}
+
+	udpAddr, err = net.ResolveUDPAddr("udp", "129.241.187.255:20063") // Oppretter ny oppkobling
+	errorHandler(err)
 
 	udpBroadcast, err := net.DialUDP("udp", nil, udpAddr)
-	if err != nil {log.Fatal(err)}
-	
-	
-	primary(backupvalue, udpBroadcast)
-	
-	udpBroadcast.Close()
-	
-	
+	errorHandler(err)
+
+	primary(backupvalue, udpBroadcast) //starter opp en ny "primary"
+
+	//udpBroadcast.Close()
+
 }
