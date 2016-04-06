@@ -18,4 +18,4 @@ type Udp_message struct {
 
 func UdpInit(localListenPort, broadcastListenPort, msgSize int, sendChan, recieveChan chan UdpMessage)(err error){
 
-}	Raddr  string //if reading tests again more
+}	Raddr  string //if reading tests again more things
