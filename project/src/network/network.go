@@ -17,5 +17,7 @@ type Udp_message struct {
 }
 
 func UdpInit(localListenPort, broadcastListenPort, msgSize int, sendChan, recieveChan chan UdpMessage)(err error){
-
-}	Raddr  string //if reading tests again more things
+	//generating broadcast address
+	BroAddr, err = net.ResolveUDPAddr("udp4", "255.255.255.255:"+strconv.Itoa(broadcastListenPort))
+	if err != nil{ return err }
+}	
