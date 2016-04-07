@@ -146,13 +146,13 @@ func elevSetMotorDirection(motorChannel <-chan int) {
 		select {
 		case cmd := <-motorChannel:
 			switch cmd {
-			case STOP:
+			case STOP: // 0
 				time.Sleep(elevStopDelay)
 				IoWriteAnalog(MOTOR, 0)
-			case UP:
+			case UP: // 1
 				IoClearBit(MOTORDIR)
 				IoWriteAnalog(MOTOR, 200*int(math.Abs(float64(maxSpeed))))
-			case DOWN:
+			case DOWN: //-1
 				IoSetBit(MOTORDIR)
 				IoWriteAnalog(MOTOR, 200*int(math.Abs(float64(maxSpeed))))
 			default:
