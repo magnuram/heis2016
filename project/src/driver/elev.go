@@ -14,8 +14,8 @@ const (
 
 //
 const (
-	BUTTON_CALL_UP = iota
-	BUTTON_CALL_DOWN
+	BUTTON_CALL_UP = iota //0
+	BUTTON_CALL_DOWN	// 1
 	BUTTON_COMMAND
 	SENSOR_FLOOR
 	INDICATOR_FLOOR
@@ -110,7 +110,7 @@ func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, mo
 	return nil
 }
 
-func readInput(buttonchannel chan<- ElevButton, elevDelay time.Duration) {
+func readInput(buttonchannel chan<- ElevButton, elevDelay time.Duration) { //works
 	inputMatrix := [N_FLOORS][3]bool{}
 	var stopbtn bool = false
 	for {

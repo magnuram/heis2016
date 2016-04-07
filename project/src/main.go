@@ -33,10 +33,15 @@ func main() {
 	}
 	for {
 		
-		fmt.Printf("Floorchannel: %v \n" ,<-floorChannel)
-		//fmt.Printf("MotorChannel: %v \n" ,<-motorChannel)
+		fmt.Printf("Floorchannel: %v \n" ,<-floorChannel) //0 -> 3
+		//fmt.Printf("ButtonChannel: %v \n" ,<- buttonChannel) //{0 0}
+		var cd driver.ElevLight
+		cd = <-lightChannel
+		fmt.Printf("lightChannel: %v,%v,%t \n" ,cd.Type, cd.Floor, cd.Active) // doesnt work
 
-		buttonChannel
+		//fmt.Printf("motorChannel: %v \n", <- motorChannel) // wont show
+
+		///buttonChannel
 
 	}
 
