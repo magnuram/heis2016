@@ -2,7 +2,7 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"log"
 	"runtime"
 	"time"
@@ -14,7 +14,7 @@ import "./driver"
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	//
-
+	
 	const elevDelay = 50 * time.Millisecond
 
 	//_____________init hardware
@@ -32,6 +32,12 @@ func main() {
 		log.Println("Hardware init complete")
 	}
 	for {
+		
+		fmt.Printf("Floorchannel: %v \n" ,<-floorChannel)
+		//fmt.Printf("MotorChannel: %v \n" ,<-motorChannel)
+
+		buttonChannel
+
 	}
 
 	/*

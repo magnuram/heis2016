@@ -14,7 +14,10 @@ func main() {
 	} else {
 		log.Println("Hardware init complete")
 	}
-	driverForslag.ElevSetFloorIndicator(0)
+	//driverForslag.ElevSetFloorIndicator(0)
+	for {
+		
+	}
 	/*
 		fmt.Println("Press STOP button to stop elevator and exit program.\n")
 
