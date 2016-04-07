@@ -17,6 +17,7 @@ const (
 	DOWN = -1
 )
 
+
 const (
 	BUTTON_CALL_UP = iota //0
 	BUTTON_CALL_DOWN	// 1
@@ -83,6 +84,7 @@ func main() {
 				
 	}
 	*/
+	
 			//ElevButton{Type: BUTTON_STOP}
 			//driver.ElevLight{Type: INDICATOR_DOOR, Active: True}
 	for {
