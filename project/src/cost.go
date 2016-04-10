@@ -1,4 +1,5 @@
-func costFunction() {
+//func costFunction() {
+
 /*
 5 heiser
 4 etasjer
@@ -9,6 +10,8 @@ input: knapp trykket, heisposisjoner for alle heiser
 output: nærmeste tilgjengelige heis
 elevator = costElevator (buttonchannel,)
 */
+
+/*
 
 func costElevator (buttonchannel{type,floor}) {
 
@@ -176,3 +179,11 @@ func costElevator (buttonchannel{type,floor}) {
 
 
 }
+
+
+*/
+
+
+
+
+
