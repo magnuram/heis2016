@@ -19,7 +19,7 @@ const (
 
 
 const (
-	BUTTON_CALL_UP = iota //0
+	BUTTON_CALL_UP = iota //0  
 	BUTTON_CALL_DOWN	// 1
 	BUTTON_COMMAND  	//2
 	SENSOR_FLOOR        //3

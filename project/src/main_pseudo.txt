@@ -1,0 +1,228 @@
+
+
+
+
+
+const (
+	UP   = 1
+	STOP = 0
+	DOWN = -1
+)
+
+
+const (
+	BUTTON_CALL_UP = iota //0    		= ignore first value by assigning to blank identifier
+										Go's iota identifier is used in const declarations to simplify definitions of incrementing numbers. 
+										Because it can be used in expressions, it provides a generality beyond that of simple enumerations.
+	BUTTON_CALL_DOWN	// 1
+	BUTTON_COMMAND  	//2
+	SENSOR_FLOOR        //3
+	INDICATOR_FLOOR 	//4
+	BUTTON_STOP  		//5
+	SENSOR_OBST  		//6
+	INDICATOR_DOOR 		//7
+)
+
+
+
+
+
+
+
+
+
+----------------------------------------------------
+-------------- MAIN PROGRAM ------------------------
+----------------------------------------------------
+func main {
+
+	--------- constant definitions, delays ----------
+
+	delay elevDelay = 50 milliseconds
+	delay openDoor = 2 seconds
+
+
+
+
+
+
+	------------ Hardware init --------------------------
+
+	logPrint: 	"Main:"
+				"Start in main"
+
+
+
+
+	channel definitions:
+
+	buttonChannel	=	chan driver.ElevButton, 10
+	lightChannel	=	chan driver.ElevLight
+	motorChannel	=	chan int
+	floorChannel	=	chan int
+
+	close all channels at bottom/end of program
+
+
+
+	if error on any channels or elevDelay
+
+		logPrint: 	"ERROR -> Main:"
+					"Hardware init failure"
+
+	else
+		logPrint: 	"Hardware init complete"
+
+
+
+
+
+
+
+		------- Variables -------------
+	var floor = floorChannel
+	var light = driver.ElevLight   // func "ElevLight" from folder "driver"
+
+
+
+
+
+
+
+		-------- Function doorCheck ----------
+	function doorCheck {
+		delay (elevDelay) 			// 50 milliseconds
+
+		motorChannel <- STOP
+		turn on light.Active
+		light.Type = INDICATOR_DOOR
+		lightChannel <- light 		// 	light = substitute for driver.ElevLight
+
+		delay (openDoor)			// 2 seconds
+
+		turn off light.Active
+		lightChannel <- light
+	}
+
+
+
+
+
+
+	for {
+
+			----------- State machine, floors -----------------------------
+			select {
+
+				case btn := <-buttonChannel
+					switch for value of btn.Floor: {
+
+						case 0:
+							if floor > 0 {
+								motorChannel <- DOWN
+							} 
+							else if floor < 0 {
+								motorChannel <- UP
+							}
+
+							for floor != 0 {
+																//		btn =<-buttonChannel}
+								floor =<- floorChannel			// Enables transition to other cases
+							}
+																//	if btn.Type == 5{stopCheck();break} }
+							doorCheck()
+						
+
+
+						case 1: 					//2.etg
+							if floor > 1 {
+								motorChannel <- DOWN
+							} 
+							else if floor < 1 {
+								motorChannel <- UP
+							}
+							for floor != 1 { 
+																//	btn =<-buttonChannel}
+								floor =<- floorChannel
+							}
+																//	if btn.Type == 5 {stopCheck();break}}
+							doorCheck()
+
+
+
+						case 2:						 //3.etg
+							if floor > 2 {
+								motorChannel <- DOWN
+							} 
+							else if floor < 2 {
+								motorChannel <- UP
+							}
+
+							for floor != 2 { 
+								floor =<- floorChannel
+							}
+																//	btn =<-buttonChannel
+																//	if btn.Type == 5{stopCheck();break}}
+							doorCheck()
+							motorChannel <- STOP
+							
+							delay (openDoor)  	// 2 seconds
+
+
+
+						case 3: 					//4.etg
+							if floor > 3 {
+								motorChannel <- DOWN
+							} 
+							else if floor < 3 {
+								motorChannel <- UP
+							}
+							
+							for floor != 3 {
+								floor =<- floorChannel
+							}
+																//	btn =<-buttonChannel
+																//	if btn.Type == 5{stopCheck();break}}
+							doorCheck()
+
+							default:
+
+							fmt.Printf("Fail button") // Print "Fail button" to terminal
+
+
+
+					}	// End of switch case
+
+
+
+
+			}		// End of select
+
+
+
+
+	} 			// End of for-loop
+
+
+
+
+
+
+
+}		// End of main program, func main
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
