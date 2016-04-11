@@ -1,3 +1,4 @@
+// Tror dette er eneste fullførte for ex3
 //This is the UDPsender.go file for ex3
 
 package main
