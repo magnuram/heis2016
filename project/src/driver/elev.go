@@ -77,6 +77,7 @@ var buttonChannelMatrix = [N_FLOORS][3]int{
 	{BUTTON_UP4, BUTTON_DOWN4, BUTTON_COMMAND4},
 }
 
+
 func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, motorChannel chan int, floorChannel chan<- int, elevDelay time.Duration) error {
 	//init the hardware
 
@@ -116,7 +117,7 @@ func readInput(buttonchannel chan<- ElevButton, elevDelay time.Duration) { //wor
 	for {
 		for Type := BUTTON_CALL_UP; Type <= BUTTON_COMMAND; Type++ {
 			for Floor := 0; Floor < N_FLOORS; Floor++ {
-				tempbtn := IoReadBit(buttonChannelMatrix[Floor][Type])
+				tempbtn := IoReadBit(buttonChannelMatrix[Floor][Type]) // Reads 
 				if tempbtn { // button been pressed
 					if !inputMatrix[Floor][Type] {
 						inputMatrix[Floor][Type] = true

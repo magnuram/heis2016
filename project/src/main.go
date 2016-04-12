@@ -2,14 +2,18 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"log"
 	"runtime"
 	"time"
+	//"encoding/binary"
+	//"net"
+	//"os/exec"
 	//"os"
 	//"os/signal"
 )
-import "./driver"
+import  "./driver"
+
 
 const (
 	UP   = 1
@@ -31,7 +35,12 @@ const (
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	//
+	
+
+
+	//backup_recovery()
+
+
 
 	const elevDelay = 50 * time.Millisecond
 	const openDoor = 2000 * time.Millisecond
@@ -58,15 +67,20 @@ func main() {
 	var light driver.ElevLight 
 
 	doorCheck := func (){
-		time.Sleep(elevDelay)
-			motorChannel <- STOP
-			light.Active = true
-			light.Type = INDICATOR_DOOR
-			lightChannel <- light
-			time.Sleep(openDoor)
-			light.Active = false
-			lightChannel <- light
+
+			//time.Sleep(elevDelay)
+
+			motorChannel <- STOP 			// Stops any initial elevator movement
+			light.Active = true 			// Makes "door open" light for all elevators active
+			light.Type = INDICATOR_DOOR		// Describes 
+			lightChannel <- light 			
+			
+			time.Sleep(openDoor)			
+			
+			light.Active = false			
+			lightChannel <- light 			
 		}
+
 /*
 	stopCheck := func () {
 				fmt.Printf("Stopper HEIS!!")
@@ -79,14 +93,17 @@ func main() {
 				lightChannel <- light
 				motorChannel <- DOWN
 				if floor != -1{
-					motorChannel <-STOP
+				motorChannel <-STOP
 				}
 				
 	}
-	*/
+*/
 	
 			//ElevButton{Type: BUTTON_STOP}
 			//driver.ElevLight{Type: INDICATOR_DOOR, Active: True}
+
+	//if (motorChannel <- UP || motorChannel <- DOWN) {
+
 	for {
 		
 		//fmt.Printf("Floorchannel: %v \n" ,<-floorChannel) //0 -> 3
@@ -98,9 +115,18 @@ func main() {
 		case btn := <-buttonChannel:
 			switch btn.Floor{
 			case 0:						//1.etg
-					if floor > 0 {
-						motorChannel <- DOWN
-					} else if floor < 0 {motorChannel <- UP}
+				if driver.IoReadBit(driver.STOP_BUTTON) {
+					motorChannel <- STOP  
+					log.Println("Stoppknapp trykket")
+					break
+				}else if floor > 0 {
+					motorChannel <- DOWN
+					log.Println("Heis gar ned fra etasje ", floor, " til  0")
+				} else if floor < 0 {
+					motorChannel <- UP
+					log.Println("Heis gar opp fra etasje ", floor, " til  0")
+				}
+				
 				for floor != 0 {
 			//		btn =<-buttonChannel}
 					floor =<- floorChannel}
@@ -108,9 +134,18 @@ func main() {
 				doorCheck()
 			
 			case 1: 					//2.etg
-				if floor > 1 {
-				motorChannel <- DOWN
-				} else if floor < 1 {motorChannel <- UP}
+				if driver.IoReadBit(driver.STOP_BUTTON) {
+					motorChannel <- STOP
+					log.Println("Stoppknapp trykket")
+					break
+				}else if floor > 1 {
+					motorChannel <- DOWN
+					log.Println("Heis gar ned fra etasje ", floor, " til  1")
+				} else if floor < 1 {
+					motorChannel <- UP
+					log.Println("Heis gar opp fra etasje ", floor, " til  1")
+				}
+				
 			for floor != 1{ 
 			//	btn =<-buttonChannel}
 				floor =<- floorChannel}
@@ -118,36 +153,56 @@ func main() {
 			doorCheck()
 
 			case 2:						 //3.etg
-			if floor > 2 {
-				motorChannel <- DOWN
-			} else if floor < 2 {motorChannel <- UP}
+				if driver.IoReadBit(driver.STOP_BUTTON) {
+					motorChannel <- STOP
+					log.Println("Stoppknapp trykket")
+					break
+				}else if floor > 2 {
+					motorChannel <- DOWN
+					log.Println("Heis gar ned fra etasje ", floor, " til  2")
+			} else if floor < 2 {
+					motorChannel <- UP
+					log.Println("Heis gar opp fra etasje ", floor, " til  2")
+				}
 			for floor != 2{ 
 				floor =<- floorChannel}
 			//	btn =<-buttonChannel
 			//	if btn.Type == 5{stopCheck();break}}
 			doorCheck()
-			motorChannel <- STOP
+			//motorChannel <- STOP
 			
-			time.Sleep(openDoor) 
+			//time.Sleep(openDoor) 
 
 			case 3: 					//4.etg
-			if floor > 3 {
-				motorChannel <- DOWN
-			} else if floor < 3 {motorChannel <- UP}
+				if driver.IoReadBit(driver.STOP_BUTTON) {
+					motorChannel <- STOP
+					log.Println("Stoppknapp trykket")
+					break
+				}else if floor > 3 {
+					motorChannel <- DOWN
+					log.Println("Heis gar ned fra etasje ", floor, " til  3")
+			} else if floor < 3 {
+					motorChannel <- UP
+					log.Println("Heis gar opp fra etasje ", floor, " til  3")
+				}
 			for floor != 3{
 				floor =<- floorChannel}
 			//	btn =<-buttonChannel
 			//	if btn.Type == 5{stopCheck();break}}
 			doorCheck()
-			default:
-			fmt.Printf("Fail button")
-			}
+			//default:
+			//fmt.Printf("Fail button")
+
+			}//switch
 	
-		}
-			
+		}//select
 
 	}//for
-}
+
+}//main
+
+	//} //
+
 
 
 
