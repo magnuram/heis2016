@@ -109,89 +109,54 @@ func main() {
 		//fmt.Printf("Floorchannel: %v \n" ,<-floorChannel) //0 -> 3
 		//fmt.Printf("ButtonChannel: %v \n" ,<- buttonChannel) //{0 0}	
 		
-
-
 		select {
 		case btn := <-buttonChannel:
 			switch btn.Floor{
 			case 0:						//1.etg
-				if driver.IoReadBit(driver.STOP_BUTTON) {
-					motorChannel <- STOP  
-					log.Println("Stoppknapp trykket")
-					break
-				}else if floor > 0 {
+				if floor > 0 {
 					motorChannel <- DOWN
 					log.Println("Heis gar ned fra etasje ", floor, " til  0")
 				} else if floor < 0 {
 					motorChannel <- UP
 					log.Println("Heis gar opp fra etasje ", floor, " til  0")
 				}
-				
-				for floor != 0 {
-			//		btn =<-buttonChannel}
-					floor =<- floorChannel}
-			//	if btn.Type == 5{stopCheck();break} }
+				for floor != 0 {floor =<- floorChannel}
 				doorCheck()
 			
 			case 1: 					//2.etg
-				if driver.IoReadBit(driver.STOP_BUTTON) {
-					motorChannel <- STOP
-					log.Println("Stoppknapp trykket")
-					break
-				}else if floor > 1 {
+				if floor > 1 {
 					motorChannel <- DOWN
 					log.Println("Heis gar ned fra etasje ", floor, " til  1")
 				} else if floor < 1 {
 					motorChannel <- UP
 					log.Println("Heis gar opp fra etasje ", floor, " til  1")
-				}
-				
-			for floor != 1{ 
-			//	btn =<-buttonChannel}
-				floor =<- floorChannel}
-			//	if btn.Type == 5 {stopCheck();break}}
-			doorCheck()
+				}				
+				for floor != 1{floor =<- floorChannel}
+				doorCheck()
 
 			case 2:						 //3.etg
-				if driver.IoReadBit(driver.STOP_BUTTON) {
-					motorChannel <- STOP
-					log.Println("Stoppknapp trykket")
-					break
-				}else if floor > 2 {
+				 if floor > 2 {
 					motorChannel <- DOWN
 					log.Println("Heis gar ned fra etasje ", floor, " til  2")
-			} else if floor < 2 {
+				} else if floor < 2 {
 					motorChannel <- UP
 					log.Println("Heis gar opp fra etasje ", floor, " til  2")
 				}
-			for floor != 2{ 
-				floor =<- floorChannel}
-			//	btn =<-buttonChannel
-			//	if btn.Type == 5{stopCheck();break}}
-			doorCheck()
-			//motorChannel <- STOP
-			
-			//time.Sleep(openDoor) 
+				for floor != 2{floor =<- floorChannel}
+				doorCheck()
 
 			case 3: 					//4.etg
-				if driver.IoReadBit(driver.STOP_BUTTON) {
-					motorChannel <- STOP
-					log.Println("Stoppknapp trykket")
-					break
-				}else if floor > 3 {
+				if floor > 3 {
 					motorChannel <- DOWN
 					log.Println("Heis gar ned fra etasje ", floor, " til  3")
-			} else if floor < 3 {
+				} else if floor < 3 {
 					motorChannel <- UP
 					log.Println("Heis gar opp fra etasje ", floor, " til  3")
 				}
-			for floor != 3{
-				floor =<- floorChannel}
-			//	btn =<-buttonChannel
-			//	if btn.Type == 5{stopCheck();break}}
-			doorCheck()
-			//default:
-			//fmt.Printf("Fail button")
+				for floor != 3{floor =<- floorChannel}
+				doorCheck()
+			default:
+			log.Printf("Fail button")
 
 			}//switch
 	
@@ -201,35 +166,5 @@ func main() {
 
 }//main
 
-	//} //
 
 
-
-
-
-
-
-/*
-   	//----------init monkey handle
-   	killChannel := make(chan os.Signal)
-   	signal.Notify(killChannel, os.Interrupt)
-   	go func() {
-   		<- killChannel
-   		motorChannel <- 0
-   		fmt.Println("KILLED ELEVATOR")
-   		time.Sleep(100 * time.Millisecond)
-   		os.Exit(1)
-   	}()
-   /*
-   				Simple up and down test
-   		if driver.ElevGetFloorSensorSignal() == driver.N_FLOORS-1 {
-   			driver.ElevSetMotorDirection(driver.DIRN_DOWN)
-   		} else if driver.ElevGetFloorSensorSignal() == 0 {
-   			driver.ElevSetMotorDirection(driver.DIRN_UP)
-   		}
-*/
-//if driver.ElevGetStopSignal() {
-//			driver.ElevSetMotorDirection(driver.DIRN_STOP)
-
-//		}
-//}
