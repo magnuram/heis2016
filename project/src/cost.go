@@ -11,17 +11,17 @@ output: nærmeste tilgjengelige heis
 elevator = costElevator (buttonchannel,)
 */
 
-/*
+nmbr_of_elvtrs = 3
 
-func costElevator (buttonchannel{type,floor}) {
+func costElevator (buttonchannel{type,floor} , lightChannel(a) , queSize(b)) {
 
-	button_matrix
+	//button_matrix
 
 	type State string
 
 	select{
 		switch {
-		case IDLE
+		case IDLE:
 
 			if (buttonchannel{up,0})
 				case = 0_0
@@ -35,22 +35,31 @@ func costElevator (buttonchannel{type,floor}) {
 				case = 1_2
 			else if (buttonchannel{down,3})
 				case = 1_3
-		break
+		
 
-		case btn_0_0 // floor 0 opp
+		case btn_0_0: // floor 0 opp
 			min_distance = 3
-			Sjekk nærmeste heis til e1
-			for (i=1 ; i<=4 ; i++) {
+			minQueSize = 100
 
-				distance_to_heis = posisjon_heis(i) - floor
+			for i:=0 ; i<nmbr_of_elvtrs ; i++ {
+				//Sjekk nærmeste heis til valgt etasje
+				distance_to_elevator(i) = lightChannel(i) - floor(i) // heisposisjon - knappetasje ==> forskjell mellom heis og destinasjon
+											// flere heiser: heisposisjon(i) - knappetasje ==> forskjell mellom heis og destinasjon
+				if distance_to_elevator < min_distance {
+					min_distance = distance_to_elevator
+					closest_elevator = i
+				}
+			
+			//Sjekk kø for alle heiser
+				if queSize(i) < minQueSize {
+					minQueSize := queSize(i)
+				}
 
-				if distance_to_heis < min
-					min_distance = distance_to_heis(i)
-					closest_heis = i
+
 			}
 			
-			Hvis aktiv
-			if available_elvtr(closest_heis) == FALSE
+
+			//if available_elvtr(closest_elevator) == FALSE
 
 			Else
 				Tilkall/aktiver hj
@@ -68,9 +77,9 @@ func costElevator (buttonchannel{type,floor}) {
 				case = 1_2
 			else if (buttonchannel{down,3})
 				case = 1_3
-		break
+		
 
-		case btn_0_1 // floor 1 opp
+		case btn_0_1: // floor 1 opp
 				Sjekk nærmeste heis til e2
 				Hvis aktiv
 					Sjekk nest nærmeste
@@ -88,10 +97,10 @@ func costElevator (buttonchannel{type,floor}) {
 				case = 1_2
 			else if (buttonchannel{down,3})
 				case = 1_3
-		break
+		
 
 
-		case btn_0_2 // floor 2 opp
+		case btn_0_2: // floor 2 opp
 				Sjekk nærmeste heis til e2
 				Hvis aktiv
 					Sjekk nest nærmeste
@@ -109,9 +118,9 @@ func costElevator (buttonchannel{type,floor}) {
 				case = 1_2
 			else if (buttonchannel{down,3})
 				case = 1_3
-		break
+		
 
-		case btn_1_1 // floor 1 ned
+		case btn_1_1: // floor 1 ned
 				Sjekk nærmeste heis til e3
 				Hvis aktiv
 					Sjekk nest nærmeste
@@ -129,9 +138,9 @@ func costElevator (buttonchannel{type,floor}) {
 				case = 1_2
 			else if (buttonchannel{down,3})
 				case = 1_3
-		break
+		
 
-		case btn_1_2 // floor 2 ned
+		case btn_1_2: // floor 2 ned
 				Sjekk nærmeste heis til e3
 				Hvis aktiv
 					Sjekk nest nærmeste
@@ -149,9 +158,9 @@ func costElevator (buttonchannel{type,floor}) {
 				case = 1_2
 			else if (buttonchannel{down,3})
 				case = 1_3
-		break
+		
 
-		case btn_1_3 // floor 3 ned
+		case btn_1_3: // floor 3 ned
 				Sjekk nærmeste heis til e4
 				Hvis aktiv
 					Sjekk nest nærmeste
@@ -169,7 +178,7 @@ func costElevator (buttonchannel{type,floor}) {
 				case = 1_2
 			else if (buttonchannel{down,3})
 				case = 1_3
-		break
+		
 
 		} 	// End switch
 
@@ -181,7 +190,7 @@ func costElevator (buttonchannel{type,floor}) {
 }
 
 
-*/
+
 
 
 
