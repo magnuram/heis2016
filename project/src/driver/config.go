@@ -3,9 +3,20 @@ package driver
 //import "name"
 
 const (
-	N_FLOORS  = 4 //Number of floors, Hardware-depentent
-	N_BUTTONS = 3 //Number of buttons/lamps on a per-floor basis
+	N_FLOORS  int = 4 //Number of floors, Hardware-depentent
+	N_BUTTONS     = 3 //Number of buttons/lamps on a per-floor basis
 )
+
+type ElevButton struct {
+	Type  int
+	Floor int
+}
+
+type ElevLight struct {
+	Type   int
+	Floor  int
+	Active bool
+}
 
 const (
 	IDLE     = 0

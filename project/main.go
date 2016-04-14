@@ -2,18 +2,11 @@
 package main
 
 import (
-	//"fmt"
-	"./driver"
-	//"./queue"
+	"./src/driver"
+
 	"log"
 	"runtime"
 	"time"
-	//"./config"
-	//"encoding/binary"
-	//"net"
-	//"os/exec"
-	//"os"
-	//"os/signal"
 )
 
 const (

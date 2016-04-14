@@ -2,42 +2,15 @@ package driver
 
 import (
 	//"C"
+	. "../channels"
+
 	"log"
 	"math"
 	"time"
-	//"config"
 )
-
-//var ButtonType = []string{
-//	"BUTTON_CALL_UP",
-//	"BUTTON_CALL_DOWN",
-//	"BUTTON_COMMAND",
-//	"SENSOR_FLOOR",
-//	"INDICATOR_FLOOR",
-//	"BUTTON_STOP",
-//	"SENSOR_OBST",
-//	"INDICATOR_DOOR",
-//}
-
-//var MotorCmd = [3]string{
-//	"DOWN",
-//	"STOP",
-//	"UP",
-//}
 
 const maxSpeed int = 14
 const elevStopDelay = 50 * time.Millisecond
-
-type ElevButton struct {
-	Type  int
-	Floor int
-}
-
-type ElevLight struct {
-	Type   int
-	Floor  int
-	Active bool
-}
 
 var lampChannelMatrix = [N_FLOORS][3]int{
 	{LIGHT_UP1, LIGHT_DOWN1, LIGHT_COMMAND1},
