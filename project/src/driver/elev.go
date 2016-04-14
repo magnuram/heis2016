@@ -5,52 +5,53 @@ import (
 	"log"
 	"math"
 	"time"
+	//"config"
 )
 
-const (
-	N_FLOORS  = 4 //Number of floors, Hardware-depentent
-	N_BUTTONS = 3 //Number of buttons/lamps on a per-floor basis
-)
+//const (
+//	N_FLOORS  = 4 //Number of floors, Hardware-depentent
+//	N_BUTTONS = 3 //Number of buttons/lamps on a per-floor basis
+//)
 
 //
-const (
-	BUTTON_CALL_UP = iota //0
-	BUTTON_CALL_DOWN	// 1
-	BUTTON_COMMAND  	//2
-	SENSOR_FLOOR        //3
-	INDICATOR_FLOOR 	//4
-	BUTTON_STOP  		//5
-	SENSOR_OBST  		//6
-	INDICATOR_DOOR 		//7
-)
+//const (
+//	BUTTON_CALL_UP = iota //0
+//	BUTTON_CALL_DOWN	// 1
+//	BUTTON_COMMAND  	//2
+//	SENSOR_FLOOR        //3
+//	INDICATOR_FLOOR 	//4
+//	BUTTON_STOP  		//5
+//	SENSOR_OBST  		//6
+//	INDICATOR_DOOR 		//7
+//)
 
-var ButtonType = []string{
-	"BUTTON_CALL_UP",
-	"BUTTON_CALL_DOWN",
-	"BUTTON_COMMAND",
-	"SENSOR_FLOOR",
-	"INDICATOR_FLOOR",
-	"BUTTON_STOP",
-	"SENSOR_OBST",
-	"INDICATOR_DOOR",
-}
+//var ButtonType = []string{
+//	"BUTTON_CALL_UP",
+//	"BUTTON_CALL_DOWN",
+//	"BUTTON_COMMAND",
+//	"SENSOR_FLOOR",
+//	"INDICATOR_FLOOR",
+//	"BUTTON_STOP",
+//	"SENSOR_OBST",
+//	"INDICATOR_DOOR",
+//}
 
-var MotorCmd = [3]string{
-	"DOWN",
-	"STOP",
-	"UP",
-}
+//var MotorCmd = [3]string{
+//	"DOWN",
+//	"STOP",
+//	"UP",
+//}
 
 const maxSpeed int = 14
 const elevStopDelay = 50 * time.Millisecond
 
 //Motor commands
 
-const (
-	UP   = 1
-	STOP = 0
-	DOWN = -1
-)
+//const (
+//	UP   = 1
+//	STOP = 0
+//	DOWN = -1
+//)
 
 type ElevButton struct {
 	Type  int

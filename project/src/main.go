@@ -6,31 +6,33 @@ import (
 	"log"
 	"runtime"
 	"time"
+	"./driver"
+	//"./config"
 	//"encoding/binary"
 	//"net"
 	//"os/exec"
 	//"os"
 	//"os/signal"
 )
-import  "./driver"
+
 
 
 const (
-	UP   = 1
-	STOP = 0
-	DOWN = -1
+ UP   = driver.UP
+ STOP = driver.STOP
+ DOWN = driver.DOWN
 )
 
 
 const (
-	BUTTON_CALL_UP = iota //0  
-	BUTTON_CALL_DOWN	// 1
-	BUTTON_COMMAND  	//2
-	SENSOR_FLOOR        //3
-	INDICATOR_FLOOR 	//4
-	BUTTON_STOP  		//5
-	SENSOR_OBST  		//6
-	INDICATOR_DOOR 		//7
+	BUTTON_CALL_UP 		= driver.BUTTON_CALL_UP 	//0  
+	BUTTON_CALL_DOWN 	= driver.BUTTON_CALL_DOWN	// 1
+	BUTTON_COMMAND  	= driver.BUTTON_COMMAND		//2
+	SENSOR_FLOOR     	= driver.SENSOR_FLOOR   	//3
+	INDICATOR_FLOOR 	= driver.INDICATOR_FLOOR	//4
+	BUTTON_STOP  		= driver.BUTTON_STOP		//5
+	SENSOR_OBST  		= driver.SENSOR_OBST		//6
+	INDICATOR_DOOR 		= driver.INDICATOR_DOOR		//7
 )
 
 func main() {
@@ -43,7 +45,7 @@ func main() {
 
 
 	const elevDelay = 50 * time.Millisecond
-	const openDoor = 2000 * time.Millisecond
+	const openDoor = 3000 * time.Millisecond
 
 	//_____________init hardware
 
@@ -67,37 +69,27 @@ func main() {
 	var light driver.ElevLight 
 
 	doorCheck := func (){
-
-			//time.Sleep(elevDelay)
-
 			motorChannel <- STOP 			// Stops any initial elevator movement
 			light.Active = true 			// Makes "door open" light for all elevators active
 			light.Type = INDICATOR_DOOR		// Describes 
 			lightChannel <- light 			
-			
 			time.Sleep(openDoor)			
-			
 			light.Active = false			
 			lightChannel <- light 			
 		}
 
-/*
-	stopCheck := func () {
-				fmt.Printf("Stopper HEIS!!")
-				motorChannel <- STOP
-				light.Type =BUTTON_STOP
-				light.Active = true
-				lightChannel <- light
-				time.Sleep(openDoor)
-				light.Active = false
-				lightChannel <- light
-				motorChannel <- DOWN
-				if floor != -1{
-				motorChannel <-STOP
-				}
-				
+	buttonLightRed := func (flr int) {
+		light.Active = true
+		light.Type = BUTTON_CALL_DOWN
+		light.Floor = flr
+		lightChannel <- light
 	}
-*/
+	buttonLightBlank := func(flr int){
+		light.Active = false
+		light.Type = BUTTON_CALL_DOWN
+		light.Floor = flr
+		lightChannel <- light
+	}
 	
 			//ElevButton{Type: BUTTON_STOP}
 			//driver.ElevLight{Type: INDICATOR_DOOR, Active: True}
@@ -112,7 +104,9 @@ func main() {
 		select {
 		case btn := <-buttonChannel:
 			switch btn.Floor{
-			case 0:						//1.etg
+				buttonLightRed(btn.Floor)
+			case 0:	
+			//buttonLightRed(0)					//1.etg
 				if floor > 0 {
 					motorChannel <- DOWN
 					log.Println("Heis gar ned fra etasje ", floor, " til  0")
@@ -121,9 +115,11 @@ func main() {
 					log.Println("Heis gar opp fra etasje ", floor, " til  0")
 				}
 				for floor != 0 {floor =<- floorChannel}
+			buttonLightBlank(0)	
 				doorCheck()
 			
-			case 1: 					//2.etg
+			case 1: 	
+			//buttonLightRed(1)					//2.etg
 				if floor > 1 {
 					motorChannel <- DOWN
 					log.Println("Heis gar ned fra etasje ", floor, " til  1")
@@ -132,9 +128,11 @@ func main() {
 					log.Println("Heis gar opp fra etasje ", floor, " til  1")
 				}				
 				for floor != 1{floor =<- floorChannel}
+				buttonLightBlank(1)
 				doorCheck()
 
-			case 2:						 //3.etg
+			case 2:	
+			//buttonLightRed(2)						 //3.etg
 				 if floor > 2 {
 					motorChannel <- DOWN
 					log.Println("Heis gar ned fra etasje ", floor, " til  2")
@@ -143,9 +141,11 @@ func main() {
 					log.Println("Heis gar opp fra etasje ", floor, " til  2")
 				}
 				for floor != 2{floor =<- floorChannel}
+				buttonLightBlank(2)
 				doorCheck()
 
-			case 3: 					//4.etg
+			case 3: 
+			//buttonLightRed(3)						//4.etg
 				if floor > 3 {
 					motorChannel <- DOWN
 					log.Println("Heis gar ned fra etasje ", floor, " til  3")
@@ -154,6 +154,7 @@ func main() {
 					log.Println("Heis gar opp fra etasje ", floor, " til  3")
 				}
 				for floor != 3{floor =<- floorChannel}
+				buttonLightBlank(3)
 				doorCheck()
 			default:
 			log.Printf("Fail button")
