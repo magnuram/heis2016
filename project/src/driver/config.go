@@ -18,8 +18,27 @@ const (
 	INDICATOR_DOOR 		//7
 )
 
+//type  Dir int
+
 const (
-	UP   = 1
-	STOP = 0
-	DOWN = -1
+	 UP   	= 1
+	 STOP  	= 0
+	 DOWN  	= -1
 )
+/*
+type ElevInfo struct {
+	CurrentFloor 	int
+	Direction 		Dir
+	Requests 		[N_FLOORS][N_BUTTONS] int
+	State			ElevatorState 
+
+}
+/*
+type ButtonType int
+
+const(
+	ButtonLocal 		ButtonType = 0
+	ButtonExternalUp 	ButtonType = 1
+	ButtonExternalDown 	ButtonType =2
+}
+*/

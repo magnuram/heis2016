@@ -77,14 +77,13 @@ func main() {
 			light.Active = false			
 			lightChannel <- light 			
 		}
-/*
+
 	buttonLightRed := func (flr int) {
 		light.Active = true
 		light.Type = BUTTON_CALL_DOWN
 		light.Floor = flr
 		lightChannel <- light
 	}
-	*/
 	buttonLightBlank := func(flr int){
 		light.Active = false
 		light.Type = BUTTON_CALL_DOWN
@@ -101,15 +100,15 @@ func main() {
 		
 		//fmt.Printf("Floorchannel: %v \n" ,<-floorChannel) //0 -> 3
 		//fmt.Printf("ButtonChannel: %v \n" ,<- buttonChannel) //{0 0}	
+
 		select {
 		case btn := <-buttonChannel:
 			switch btn.Type{
-			case 0,1:				//external button
-				
+			case 0,1:			//external
+				log.Println("meaow")
 
-
-			case 2:					//Local button
-				if btn.Floor == 0{ 				//1.etg
+			case 2:				//Localbutton
+				if btn.Floor == 0{
 					if floor > 0 {
 					motorChannel <- DOWN
 				} else if floor < 0 {
@@ -118,7 +117,7 @@ func main() {
 				for floor != 0 {floor =<- floorChannel}
 				buttonLightBlank(0)	
 				doorCheck()
-					}else if btn.Floor == 1{	//2.etg
+					}else if btn.Floor == 1{
 						if floor > 1 {
 					motorChannel <- DOWN
 					} else if floor < 1 {
@@ -128,25 +127,28 @@ func main() {
 					buttonLightBlank(1)
 					doorCheck()
 
-						}else if btn.Floor == 2{	//3.etg
+						}else if btn.Floor == 2{
 							if floor > 2 {
 						motorChannel <- DOWN
 						} else if floor < 2 {
 						motorChannel <- UP
 						}
 						for floor != 2{floor =<- floorChannel}
+						buttonLightBlank(2)
 						doorCheck()
 
-							}else if btn.Floor == 3{	//4.etg
+							}else if btn.Floor == 3{
 								if floor > 3 {
 								motorChannel <- DOWN
 								} else if floor < 3 {
 								motorChannel <- UP
 								}
 								for floor != 3{floor =<- floorChannel}
+								buttonLightBlank(3)
 								doorCheck()
 
 							}
+			
 			default:
 			log.Printf("Fail button")
 
