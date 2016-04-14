@@ -52,11 +52,12 @@ func main() {
 	log.Println("Main: \t Start in main")
 	buttonChannel := make(chan driver.ElevButton, 10)
 	lightChannel := make(chan driver.ElevLight)
+	//elevinfoChannel := make(chan driver.ElevInfo)
 	motorChannel := make(chan int)
 	floorChannel := make(chan int)
 	defer close(buttonChannel)
 	defer close(lightChannel)
-	defer close(motorChannel)
+	defer close(motorChannel) 
 	defer close(floorChannel)
 
 	if err := driver.ElevInit(buttonChannel, lightChannel, motorChannel, floorChannel, elevDelay); err != nil {
@@ -66,6 +67,7 @@ func main() {
 		log.Println("Hardware init complete")
 	}
 	var floor = <-floorChannel
+	//var floor  driver.ElevInfo
 	var light driver.ElevLight 
 
 	doorCheck := func (){
@@ -80,18 +82,29 @@ func main() {
 /*
 	buttonLightRed := func (flr int) {
 		light.Active = true
-		light.Type = BUTTON_CALL_DOWN
+		light.Type = BUTTON_COMMAND
 		light.Floor = flr
 		lightChannel <- light
 	}
 	*/
 	buttonLightBlank := func(flr int){
 		light.Active = false
-		light.Type = BUTTON_CALL_DOWN
+		light.Type = BUTTON_COMMAND
 		light.Floor = flr
 		lightChannel <- light
 	}
-	
+
+	gotoFloor := func(flr int){ 			//Makes the elevator go to the floor
+			
+		if floor > flr {
+					motorChannel <- DOWN
+				} else if floor < flr {
+					motorChannel <- UP
+				}
+				for floor != flr {floor =<- floorChannel}
+				buttonLightBlank(flr)	
+				doorCheck()
+}
 			//ElevButton{Type: BUTTON_STOP}
 			//driver.ElevLight{Type: INDICATOR_DOOR, Active: True}
 
@@ -99,53 +112,26 @@ func main() {
 
 	for {
 		
-		//fmt.Printf("Floorchannel: %v \n" ,<-floorChannel) //0 -> 3
+		//log.Println("Floorchannel: \n" ,floor) //0 -> 3
 		//fmt.Printf("ButtonChannel: %v \n" ,<- buttonChannel) //{0 0}	
 		select {
 		case btn := <-buttonChannel:
 			switch btn.Type{
 			case 0,1:				//external button
-				
+				 
 
 
 			case 2:					//Local button
 				if btn.Floor == 0{ 				//1.etg
-					if floor > 0 {
-					motorChannel <- DOWN
-				} else if floor < 0 {
-					motorChannel <- UP
-				}
-				for floor != 0 {floor =<- floorChannel}
-				buttonLightBlank(0)	
-				doorCheck()
+				gotoFloor(0)
 					}else if btn.Floor == 1{	//2.etg
-						if floor > 1 {
-					motorChannel <- DOWN
-					} else if floor < 1 {
-					motorChannel <- UP
-					}				
-					for floor != 1{floor =<- floorChannel}
-					buttonLightBlank(1)
-					doorCheck()
+					gotoFloor(1)
 
 						}else if btn.Floor == 2{	//3.etg
-							if floor > 2 {
-						motorChannel <- DOWN
-						} else if floor < 2 {
-						motorChannel <- UP
-						}
-						for floor != 2{floor =<- floorChannel}
-						doorCheck()
+						gotoFloor(2)
 
 							}else if btn.Floor == 3{	//4.etg
-								if floor > 3 {
-								motorChannel <- DOWN
-								} else if floor < 3 {
-								motorChannel <- UP
-								}
-								for floor != 3{floor =<- floorChannel}
-								doorCheck()
-
+								gotoFloor(3)
 							}
 			default:
 			log.Printf("Fail button")
