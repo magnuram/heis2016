@@ -8,7 +8,6 @@ import (
 	//"config"
 )
 
-
 //var ButtonType = []string{
 //	"BUTTON_CALL_UP",
 //	"BUTTON_CALL_DOWN",
@@ -28,7 +27,6 @@ import (
 
 const maxSpeed int = 14
 const elevStopDelay = 50 * time.Millisecond
-
 
 type ElevButton struct {
 	Type  int
@@ -54,9 +52,6 @@ var buttonChannelMatrix = [N_FLOORS][3]int{
 	{BUTTON_UP3, BUTTON_DOWN3, BUTTON_COMMAND3},
 	{BUTTON_UP4, BUTTON_DOWN4, BUTTON_COMMAND4},
 }
-
-
-
 
 func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, motorChannel chan int, floorChannel chan<- int, elevDelay time.Duration) error {
 	//init the hardware
@@ -97,8 +92,8 @@ func readInput(buttonchannel chan<- ElevButton, elevDelay time.Duration) { //wor
 	for {
 		for Type := BUTTON_CALL_UP; Type <= BUTTON_COMMAND; Type++ {
 			for Floor := 0; Floor < N_FLOORS; Floor++ {
-				tempbtn := IoReadBit(buttonChannelMatrix[Floor][Type]) // Reads 
-				if tempbtn { // button been pressed
+				tempbtn := IoReadBit(buttonChannelMatrix[Floor][Type]) // Reads
+				if tempbtn {                                           // button been pressed
 					if !inputMatrix[Floor][Type] {
 						inputMatrix[Floor][Type] = true
 						buttonchannel <- ElevButton{Type, Floor}
@@ -121,7 +116,6 @@ func readInput(buttonchannel chan<- ElevButton, elevDelay time.Duration) { //wor
 
 }
 
-
 func elevSetMotorDirection(motorChannel <-chan int) {
 	for {
 		select {
@@ -143,15 +137,13 @@ func elevSetMotorDirection(motorChannel <-chan int) {
 	}
 }
 
-
-
 func lightCheck(lightChannel <-chan ElevLight) {
 	var cmd ElevLight
 	for {
 		select {
 		case cmd = <-lightChannel:
 			switch cmd.Type {
-			case BUTTON_STOP:
+			case BUTTON_STOP: //Doesn't use
 				if cmd.Active {
 					IoSetBit(LIGHT_STOP)
 				} else {
@@ -209,8 +201,6 @@ func setFloorIndicator(floor int) { //works
 		IoClearBit(LIGHT_FLOOR_IND2)
 	}
 }
-
-
 
 func ElevGetStopSignal() bool {
 	return IoReadBit(STOP_BUTTON)

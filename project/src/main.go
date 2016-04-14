@@ -112,7 +112,6 @@ func main() {
 
 		//log.Println("Floorchannel: \n" ,floor) //0 -> 3
 		//fmt.Printf("ButtonChannel: %v \n" ,<- buttonChannel) //{0 0}
-		//queue.QueSetLights(light)
 
 		select {
 		case btn := <-buttonChannel:
@@ -121,21 +120,21 @@ func main() {
 			case 0: //-------------------Down Button
 				switch btn.Floor {
 				case 0: //1.etg
-					buttonLightOn(0, BUTTON_CALL_UP)
+					//buttonLightOn(0, BUTTON_CALL_UP)
 					gotoFloor(0)
-					buttonLightOff(0, BUTTON_CALL_UP)
+					//buttonLightOff(0, BUTTON_CALL_UP)
 				case 1: //2.etg
-					buttonLightOn(1, BUTTON_CALL_UP)
+					//buttonLightOn(1, BUTTON_CALL_UP)
 					gotoFloor(1)
-					buttonLightOff(1, BUTTON_CALL_UP)
+					//buttonLightOff(1, BUTTON_CALL_UP)
 				case 2: //3.etg
-					buttonLightOn(2, BUTTON_CALL_UP)
+					//buttonLightOn(2, BUTTON_CALL_UP)
 					gotoFloor(2)
-					buttonLightOff(2, BUTTON_CALL_UP)
+					//buttonLightOff(2, BUTTON_CALL_UP)
 				case 3: //4.etg
-					buttonLightOn(3, BUTTON_CALL_UP)
+					//buttonLightOn(3, BUTTON_CALL_UP)
 					gotoFloor(3)
-					buttonLightOff(3, BUTTON_CALL_UP)
+					//buttonLightOff(3, BUTTON_CALL_UP)
 				}
 			case 1: //----------------------Up Button
 				switch btn.Floor {
