@@ -2,7 +2,8 @@
 package main
 
 import (
-	"./src/driver"
+	"./src/config"
+	"./src/elev"
 
 	"log"
 	"runtime"
@@ -10,20 +11,20 @@ import (
 )
 
 const (
-	UP   = driver.UP
-	STOP = driver.STOP
-	DOWN = driver.DOWN
+	UP   = config.UP
+	STOP = config.STOP
+	DOWN = config.DOWN
 )
 
 const (
-	BUTTON_CALL_UP   = driver.BUTTON_CALL_UP   //0
-	BUTTON_CALL_DOWN = driver.BUTTON_CALL_DOWN // 1
-	BUTTON_COMMAND   = driver.BUTTON_COMMAND   //2  ---Internal button
-	SENSOR_FLOOR     = driver.SENSOR_FLOOR     //3
-	INDICATOR_FLOOR  = driver.INDICATOR_FLOOR  //4
-	BUTTON_STOP      = driver.BUTTON_STOP      //5 -- Doesn't use it
-	SENSOR_OBST      = driver.SENSOR_OBST      //6 -- Doesn't use it
-	INDICATOR_DOOR   = driver.INDICATOR_DOOR   //7
+	BUTTON_CALL_UP   = config.BUTTON_CALL_UP   //0
+	BUTTON_CALL_DOWN = config.BUTTON_CALL_DOWN // 1
+	BUTTON_COMMAND   = config.BUTTON_COMMAND   //2  ---Internal button
+	SENSOR_FLOOR     = config.SENSOR_FLOOR     //3
+	INDICATOR_FLOOR  = config.INDICATOR_FLOOR  //4
+	BUTTON_STOP      = config.BUTTON_STOP      //5 -- Doesn't use it
+	SENSOR_OBST      = config.SENSOR_OBST      //6 -- Doesn't use it
+	INDICATOR_DOOR   = config.INDICATOR_DOOR   //7
 )
 
 func main() {
@@ -32,13 +33,13 @@ func main() {
 	//backup_recovery()
 
 	const elevDelay = 50 * time.Millisecond
-	const openDoor = 3000 * time.Millisecond
+	const openDoor = 1000 * time.Millisecond
 
 	//_____________init hardware
 
 	log.Println("Main: \t Start in main")
-	buttonChannel := make(chan driver.ElevButton, 10)
-	lightChannel := make(chan driver.ElevLight)
+	buttonChannel := make(chan elev.ElevButton, 10)
+	lightChannel := make(chan elev.ElevLight)
 	//elevinfoChannel := make(chan driver.ElevInfo)
 	motorChannel := make(chan int)
 	floorChannel := make(chan int)
@@ -47,7 +48,7 @@ func main() {
 	defer close(motorChannel)
 	defer close(floorChannel)
 
-	if err := driver.ElevInit(buttonChannel, lightChannel, motorChannel, floorChannel, elevDelay); err != nil {
+	if err := elev.ElevInit(buttonChannel, lightChannel, motorChannel, floorChannel, elevDelay); err != nil {
 		log.Println("ERROR -> Main: \t Hardware init failure")
 		log.Fatal(err)
 	} else {
@@ -57,7 +58,7 @@ func main() {
 	//var floor  driver.ElevInfo
 	//var elevator config.ElevInfo
 	//elevator.Dir = elevator_type.Stop
-	var light driver.ElevLight
+	var light elev.ElevLight
 
 	doorCheck := func() {
 		time.Sleep(elevDelay)       //Sets it at right place
@@ -96,6 +97,7 @@ func main() {
 		}
 		doorCheck()
 	}
+
 	//ElevButton{Type: BUTTON_STOP}
 	//driver.ElevLight{Type: INDICATOR_DOOR, Active: True}
 

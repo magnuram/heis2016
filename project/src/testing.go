@@ -88,36 +88,70 @@ func main() {
 	//driver.ElevLight{Type: INDICATOR_DOOR, Active: True}
 
 	//if (motorChannel <- UP || motorChannel <- DOWN) {
-	var drive = <-motorChannel
-	for {
 
-		//fmt.Printf("Floorchannel: %v \n" ,<-floorChannel) //0 -> 3
-		//fmt.Printf("ButtonChannel: %v \n" ,<- buttonChannel) //{0 0}
 		select {
 		case btn := <-buttonChannel:
 			switch btn.Type {
-			case 0, 1: //------external button
+			//-----------------------------------------------External button
+			case 0: //-------------------Down Button
 				switch btn.Floor {
 				case 0: //1.etg
+					//buttonLightOn(0, BUTTON_CALL_UP)
 					gotoFloor(0)
+					//buttonLightOff(0, BUTTON_CALL_UP)
 				case 1: //2.etg
+					//buttonLightOn(1, BUTTON_CALL_UP)
 					gotoFloor(1)
+					//buttonLightOff(1, BUTTON_CALL_UP)
 				case 2: //3.etg
+					//buttonLightOn(2, BUTTON_CALL_UP)
 					gotoFloor(2)
+					//buttonLightOff(2, BUTTON_CALL_UP)
 				case 3: //4.etg
+					//buttonLightOn(3, BUTTON_CALL_UP)
 					gotoFloor(3)
+					//buttonLightOff(3, BUTTON_CALL_UP)
 				}
-			case 2: //--------Local button
+			case 1: //----------------------Up Button
 				switch btn.Floor {
 				case 0: //1.etg
+					buttonLightOn(0, BUTTON_CALL_DOWN)
 					gotoFloor(0)
+					buttonLightOff(0, BUTTON_CALL_DOWN)
 				case 1: //2.etg
+					buttonLightOn(1, BUTTON_CALL_DOWN)
 					gotoFloor(1)
+					buttonLightOff(1, BUTTON_CALL_DOWN)
 				case 2: //3.etg
+					buttonLightOn(2, BUTTON_CALL_DOWN)
 					gotoFloor(2)
+					buttonLightOff(2, BUTTON_CALL_DOWN)
 				case 3: //4.etg
+					buttonLightOn(3, BUTTON_CALL_DOWN)
 					gotoFloor(3)
-				}			default:
+					buttonLightOff(3, BUTTON_CALL_DOWN)
+				}
+				//---------------------------------------------Local button
+			case 2:
+				switch btn.Floor {
+				case 0: //1.etg
+					buttonLightOn(0, BUTTON_COMMAND)
+					gotoFloor(0)
+					buttonLightOff(0, BUTTON_COMMAND)
+				case 1: //2.etg
+					buttonLightOn(1, BUTTON_COMMAND)
+					gotoFloor(1)
+					buttonLightOff(1, BUTTON_COMMAND)
+				case 2: //3.etg
+					buttonLightOn(2, BUTTON_COMMAND)
+					gotoFloor(2)
+					buttonLightOff(2, BUTTON_COMMAND)
+				case 3: //4.etg
+					buttonLightOn(3, BUTTON_COMMAND)
+					gotoFloor(3)
+					buttonLightOff(3, BUTTON_COMMAND)
+				}
+			default:
 				log.Printf("Fail button")
 
 			} //switch

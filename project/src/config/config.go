@@ -1,4 +1,4 @@
-package driver
+package config
 
 //import "name"
 
@@ -7,19 +7,8 @@ const (
 	N_BUTTONS     = 3 //Number of buttons/lamps on a per-floor basis
 )
 
-type ElevButton struct {
-	Type  int
-	Floor int
-}
-
-type ElevLight struct {
-	Type   int
-	Floor  int
-	Active bool
-}
-
 const (
-	IDLE     = 0
+	STOP_DIR = 0
 	UP_DIR   = 1
 	DOWN_DIR = -1
 )
@@ -35,29 +24,29 @@ const (
 	INDICATOR_DOOR          //7
 )
 
-//type  Dir int
+//STATES
+const (
+	INIT = iota
+	IDLE
+	MOVING
+	DOOROPEN
+	STOPS
+)
 
+//Motor Command
 const (
 	UP   = 1
 	STOP = 0
 	DOWN = -1
 )
 
-type ElevInfo struct {
+type ELEVINFO struct {
 	State     int
 	PrevFloor int
 	Direction int
 	ReqUp     [N_FLOORS]int
 	ReqDown   [N_FLOORS]int
-	ReqInside [N_FLOORS]int
+	ReqLocal  [N_FLOORS]int
 }
 
-/*
-type ButtonType int
-
-const(
-	ButtonLocal 		ButtonType = 0
-	ButtonExternalUp 	ButtonType = 1
-	ButtonExternalDown 	ButtonType =2
-}
-*/
+var Elinf = ELEVINFO{}

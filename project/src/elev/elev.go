@@ -1,13 +1,26 @@
-package driver
+package elev
 
 import (
 	//"C"
 	. "../channels"
+	. "../config"
+	. "../driver"
 
 	"log"
 	"math"
 	"time"
 )
+
+type ElevButton struct {
+	Type  int
+	Floor int
+}
+
+type ElevLight struct {
+	Type   int
+	Floor  int
+	Active bool
+}
 
 const maxSpeed int = 14
 const elevStopDelay = 50 * time.Millisecond
