@@ -56,6 +56,8 @@ var buttonChannelMatrix = [N_FLOORS][3]int{
 }
 
 
+
+
 func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, motorChannel chan int, floorChannel chan<- int, elevDelay time.Duration) error {
 	//init the hardware
 

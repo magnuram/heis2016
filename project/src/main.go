@@ -68,6 +68,8 @@ func main() {
 	}
 	var floor = <-floorChannel
 	//var floor  driver.ElevInfo
+	//var elevator config.ElevInfo
+	//elevator.Dir = elevator_type.Stop
 	var light driver.ElevLight 
 
 	doorCheck := func (){
@@ -97,6 +99,7 @@ func main() {
 	gotoFloor := func(flr int){ 			//Makes the elevator go to the floor
 			
 		if floor > flr {
+					//elevator.Dir = ElevInfo.DOWN
 					motorChannel <- DOWN
 				} else if floor < flr {
 					motorChannel <- UP
@@ -104,7 +107,7 @@ func main() {
 				for floor != flr {floor =<- floorChannel}
 				buttonLightBlank(flr)	
 				doorCheck()
-}
+		}
 			//ElevButton{Type: BUTTON_STOP}
 			//driver.ElevLight{Type: INDICATOR_DOOR, Active: True}
 

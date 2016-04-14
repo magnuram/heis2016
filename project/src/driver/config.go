@@ -25,8 +25,16 @@ const (
 	 STOP  	= 0
 	 DOWN  	= -1
 )
+/*
+type ElevInfo struct {
+	CurrentFloor 	int
+	lol int
+	Direction 		Dir
+	//Requests 		[N_FLOORS][N_BUTTONS] int
+	//State			ElevatorState 
 
-
+}
+*/
 /*
 type ButtonType int
 
