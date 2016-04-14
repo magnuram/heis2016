@@ -94,13 +94,35 @@ func main() {
 		//fmt.Printf("Floorchannel: %v \n" ,<-floorChannel) //0 -> 3
 		//fmt.Printf("ButtonChannel: %v \n" ,<- buttonChannel) //{0 0}
 		select {
-		case driver.IDLE:
+		case btn := <-buttonChannel:
+			switch btn.Type {
+			case 0, 1: //------external button
+				switch btn.Floor {
+				case 0: //1.etg
+					gotoFloor(0)
+				case 1: //2.etg
+					gotoFloor(1)
+				case 2: //3.etg
+					gotoFloor(2)
+				case 3: //4.etg
+					gotoFloor(3)
+				}
+			case 2: //--------Local button
+				switch btn.Floor {
+				case 0: //1.etg
+					gotoFloor(0)
+				case 1: //2.etg
+					gotoFloor(1)
+				case 2: //3.etg
+					gotoFloor(2)
+				case 3: //4.etg
+					gotoFloor(3)
+				}			default:
+				log.Printf("Fail button")
 
-		case drive.UP_DIR:
+			} //switch
 
-		case drive.DOWN_DIR:
-
-		}
+		} //select
 
 	} //for
 

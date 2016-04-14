@@ -32,16 +32,15 @@ const (
 	DOWN = -1
 )
 
-/*
 type ElevInfo struct {
-	CurrentFloor 	int
-	lol int
-	Direction 		Dir
-	//Requests 		[N_FLOORS][N_BUTTONS] int
-	//State			ElevatorState
-
+	State     int
+	PrevFloor int
+	Direction int
+	ReqUp     [N_FLOORS]int
+	ReqDown   [N_FLOORS]int
+	ReqInside [N_FLOORS]int
 }
-*/
+
 /*
 type ButtonType int
 
