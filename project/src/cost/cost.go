@@ -1,198 +1,70 @@
-//func costFunction() {
+package cost
 
-/*
-5 heiser
-4 etasjer
+import (
+	. "../config"
+	"errors"
+	"log"
+	"sort"
+	"strconv"
+)
 
-trykk utside etasje 2
+const debug = false
+const stopTimeInFloor int = 3
+const travelTime int = 2
 
-input: knapp trykket, heisposisjoner for alle heiser
-output: nærmeste tilgjengelige heis
-elevator = costElevator (buttonchannel,)
-*/
-
-nmbr_of_elvtrs = 3
-
-func costElevator (buttonchannel{type,floor} , lightChannel(a) , queSize(b)) {
-
-	//button_matrix
-
-	type State string
-
-	select{
-		switch {
-		case IDLE:
-
-			if (buttonchannel{up,0})
-				case = 0_0
-			else if (buttonchannel{up,1})
-				case = 0_1
-			else if (buttonchannel{up,2})
-				case = 0_2
-			else if (buttonchannel{down,1})
-				case = 1_1
-			else if (buttonchannel{down,2})
-				case = 1_2
-			else if (buttonchannel{down,3})
-				case = 1_3
-		
-
-		case btn_0_0: // floor 0 opp
-			min_distance = 3
-			minQueSize = 100
-
-			for i:=0 ; i<nmbr_of_elvtrs ; i++ {
-				//Sjekk nærmeste heis til valgt etasje
-				distance_to_elevator(i) = lightChannel(i) - floor(i) // heisposisjon - knappetasje ==> forskjell mellom heis og destinasjon
-											// flere heiser: heisposisjon(i) - knappetasje ==> forskjell mellom heis og destinasjon
-				if distance_to_elevator < min_distance {
-					min_distance = distance_to_elevator
-					closest_elevator = i
-				}
-			
-			//Sjekk kø for alle heiser
-				if queSize(i) < minQueSize {
-					minQueSize := queSize(i)
-				}
-
-
-			}
-			
-
-			//if available_elvtr(closest_elevator) == FALSE
-
-			Else
-				Tilkall/aktiver hj
-				hj to e1
-				return closest_heis
-			if (buttonchannel{up,0})
-				case = 0_0
-			else if (buttonchannel{up,1})
-				case = 0_1
-			else if (buttonchannel{up,2})
-				case = 0_2
-			else if (buttonchannel{down,1})
-				case = 1_1
-			else if (buttonchannel{down,2})
-				case = 1_2
-			else if (buttonchannel{down,3})
-				case = 1_3
-		
-
-		case btn_0_1: // floor 1 opp
-				Sjekk nærmeste heis til e2
-				Hvis aktiv
-					Sjekk nest nærmeste
-				Else
-					Tilkall/aktiver
-			if (buttonchannel{up,0})
-				case = 0_0
-			else if (buttonchannel{up,1})
-				case = 0_1
-			else if (buttonchannel{up,2})
-				case = 0_2
-			else if (buttonchannel{down,1})
-				case = 1_1
-			else if (buttonchannel{down,2})
-				case = 1_2
-			else if (buttonchannel{down,3})
-				case = 1_3
-		
-
-
-		case btn_0_2: // floor 2 opp
-				Sjekk nærmeste heis til e2
-				Hvis aktiv
-					Sjekk nest nærmeste
-				Else
-					Tilkall/aktiver
-			if (buttonchannel{up,0})
-				case = 0_0
-			else if (buttonchannel{up,1})
-				case = 0_1
-			else if (buttonchannel{up,2})
-				case = 0_2
-			else if (buttonchannel{down,1})
-				case = 1_1
-			else if (buttonchannel{down,2})
-				case = 1_2
-			else if (buttonchannel{down,3})
-				case = 1_3
-		
-
-		case btn_1_1: // floor 1 ned
-				Sjekk nærmeste heis til e3
-				Hvis aktiv
-					Sjekk nest nærmeste
-				Else
-					Tilkall/aktiver
-			if (buttonchannel{up,0})
-				case = 0_0
-			else if (buttonchannel{up,1})
-				case = 0_1
-			else if (buttonchannel{up,2})
-				case = 0_2
-			else if (buttonchannel{down,1})
-				case = 1_1
-			else if (buttonchannel{down,2})
-				case = 1_2
-			else if (buttonchannel{down,3})
-				case = 1_3
-		
-
-		case btn_1_2: // floor 2 ned
-				Sjekk nærmeste heis til e3
-				Hvis aktiv
-					Sjekk nest nærmeste
-				Else
-					Tilkall/aktiver
-			if (buttonchannel{up,0})
-				case = 0_0
-			else if (buttonchannel{up,1})
-				case = 0_1
-			else if (buttonchannel{up,2})
-				case = 0_2
-			else if (buttonchannel{down,1})
-				case = 1_1
-			else if (buttonchannel{down,2})
-				case = 1_2
-			else if (buttonchannel{down,3})
-				case = 1_3
-		
-
-		case btn_1_3: // floor 3 ned
-				Sjekk nærmeste heis til e4
-				Hvis aktiv
-					Sjekk nest nærmeste
-				Else
-					Tilkall/aktiver
-			if (buttonchannel{up,0})
-				case = 0_0
-			else if (buttonchannel{up,1})
-				case = 0_1
-			else if (buttonchannel{up,2})
-				case = 0_2
-			else if (buttonchannel{down,1})
-				case = 1_1
-			else if (buttonchannel{down,2})
-				case = 1_2
-			else if (buttonchannel{down,3})
-				case = 1_3
-		
-
-		} 	// End switch
-
-	} 		// End select
-
+func AssignNewOrder(knownElevators map[string]*Elevator, activeElevators map[string]bool, externalOrderMatrix [N_FLOORS][2]ElevOrder, Floor, Type int) (string, error) {
+	numOfActiveElvators := len(activeElevators)
+	printDebug("NumOfActiveElvators" + string(numOfActiveElvators))
+	if numOfActiveElvators == 0 {
+		return "", errors.New("COST:\t Can not AssignNewOrder with zero active elevators")
+	}
+	cost := elevCosts{}
+	for IP, _ := range activeElevators {
+		elevator := ExtendedElevState{knownElevators[IP].State, externalOrderMatrix}
+		numOfFloors, numStops := elevator.LengthToOrder(Floor, Type)
+		costToOrder := numOfFloors*travelTime + numStops*stopTimeInFloor
+		printDebug("Elevator: " + IP + " has cost: " + strconv.Itoa(costToOrder))
+		cost = append(cost, elevCost{costToOrder, IP})
+	}
+	sort.Sort(cost)
+	if lowestIP := cost[0].IP; lowestIP != "" {
+		log.Println("COST:\t Assigning new order to " + lowestIP)
+		return lowestIP, nil
+	} else {
+		return "", errors.New("COST:\t Something went wrong in AssignNewOrder()")
+	}
 }
 
+type elevCosts []elevCost
 
+type elevCost struct {
+	Cost int
+	IP   string
 }
 
+func (slice elevCosts) Len() int {
+	return len(slice)
+}
 
+func (slice elevCosts) Less(i, j int) bool {
+	if slice[i].Cost != slice[j].Cost {
+		return slice[i].Cost < slice[j].Cost
+	}
+	return slice[i].IP < slice[j].IP
+}
 
+func (slice elevCosts) Swap(i, j int) {
+	slice[i], slice[j] = slice[j], slice[i]
+}
 
+func (slice elevCosts) Print() {
+	for _, e := range slice {
+		log.Println("COST:\t IP", e.IP, "has cost ", e.Cost)
+	}
+}
 
-
-
-
+func printDebug(s string) {
+	if debug {
+		log.Println("COST:\t", s)
+	}
+}

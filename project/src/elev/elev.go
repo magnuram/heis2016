@@ -10,12 +10,12 @@ import (
 	"math"
 	"time"
 )
-
+//struct for elevator button Type, Floor
 type ElevButton struct {
 	Type  int
 	Floor int
 }
-
+//struct for elevator light Type,Floor, Active
 type ElevLight struct {
 	Type   int
 	Floor  int
@@ -49,16 +49,13 @@ func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, mo
 
 	clearAlllights()
 
-	go lightCheck(lightChannel)
+	go lightController(lightChannel)
 
-	go elevSetMotorDirection(motorChannel)
+	go motorController(motorChannel)
 
 	if getFloorSensorSignal() == -1 {
 		motorChannel <- DOWN
 		for {
-			//var floor  driver.ElevInfo
-			//var elevator config.ElevInfo
-			//elevator.Dir = elevator_type.Stop
 			if getFloorSensorSignal() != -1 {
 				motorChannel <- STOP
 				break
@@ -104,7 +101,7 @@ func readInput(buttonchannel chan<- ElevButton, elevDelay time.Duration) { //wor
 
 }
 
-func elevSetMotorDirection(motorChannel <-chan int) {
+func motorController(motorChannel <-chan int) {
 	for {
 		select {
 		case cmd := <-motorChannel:
@@ -125,7 +122,7 @@ func elevSetMotorDirection(motorChannel <-chan int) {
 	}
 }
 
-func lightCheck(lightChannel <-chan ElevLight) {
+func lightController(lightChannel <-chan ElevLight) {
 	var cmd ElevLight
 	for {
 		select {
@@ -220,7 +217,7 @@ func clearAlllights() {
 
 }
 
-func getFloorSensorSignal() int { // works
+func getFloorSensorSignal() int {
 	if IoReadBit(SENSOR_FLOOR1) {
 		return 0 //0
 	} else if IoReadBit(SENSOR_FLOOR2) {

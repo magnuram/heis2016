@@ -4,23 +4,43 @@ package main
 import (
 	. "./src/config"
 	"./src/elev"
-	//. "./src/queue"
-	. "./src/driver"
+	// "./src/network"
+	// "./src/cost"
 	"log"
 	"runtime"
 	"time"
+	"os"
+	"os/signal"
+	//"strconv"
+	//"fmt"
+	//"math/rand"
 )
+
+const debug = false
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	//backup_recovery()
-
+	//new
+//	const connectionAttempsLimit = 10
+    //r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	const elevDelay = 50 * time.Millisecond
 	const openDoor = 1000 * time.Millisecond
+	//const ackTimeout = 500 * time.Millisecond
+/*
+	//new
+	var knownElevators = make(map[string]*Elevator) //key = IPadr
+	var activeElevators = make(map[string]bool)     //key = IPadr
+	const iAmAliveTickTime = 100 * time.Millisecond
+	const iAmAliveLimit = 3*iAmAliveTickTime + 10*time.Millisecond
+	var externalOrderMatrix [N_FLOORS][2]ElevOrder
 
-	//_____________init hardware
+	//var orderTimeout = 5*time.Second + time.Duration(r.Intn(2000))*time.Millisecond
+	const doorWaitTime = 3000 * time.Millisecond
+*/
 
+
+//------------------------Init Hardware
 	log.Println("Main: \t Start in main")
 	buttonChannel := make(chan elev.ElevButton, 10)
 	lightChannel := make(chan elev.ElevLight)
@@ -32,17 +52,66 @@ func main() {
 	defer close(motorChannel)
 	defer close(floorChannel)
 
+//------------------------Init Hardware
 	if err := elev.ElevInit(buttonChannel, lightChannel, motorChannel, floorChannel, elevDelay); err != nil {
 		log.Println("ERROR -> Main: \t Hardware init failure")
 		log.Fatal(err)
 	} else {
 		log.Println("Hardware init complete")
 	}
+
+
+//----------Init simple error handling
+	killChan := make(chan os.Signal)
+	signal.Notify(killChan, os.Interrupt)
+	go func() {
+		<-killChan
+		motorChannel <- STOP
+		log.Println("\n----------   Elevator is killed    -------------")
+		time.Sleep(100 * time.Millisecond)
+		os.Exit(1)
+	}()
+
+/*
+
+//--------Init network
+	receiveOrderChannel := make(chan ElevOrderMessage, 5)
+	sendOrderChannel := make(chan ElevOrderMessage)
+	receiveRestoreChannel := make(chan ElevRestoreMessage, 5)
+	sendRestoreChannel := make(chan ElevRestoreMessage)
+	localIP, err := initNetwork(connectionAttempsLimit, receiveOrderChannel, sendOrderChannel, receiveRestoreChannel, sendRestoreChannel)
+	if err != nil {
+		log.Println("MAIN:\t Network init failed")
+		log.Fatal(err)
+	} else if debug {
+		log.Println("MAIN:\t Network init successful")
+	}
+*/
+
 	var floor = <-floorChannel
-	//var floor  driver.ElevInfo
-	//var elevator config.ElevInfo
-	//elevator.Dir = elevator_type.Stop
 	var light elev.ElevLight
+
+/*
+//-----Initialise state------
+	log.Println("MAIN:    Sending out a request after my previous state")
+	sendRestoreChannel <- ElevRestoreMessage{
+		AskerIP: localIP,
+		State:   ElevState{},
+		Event:   EvRequestingState,
+	}
+	knownElevators[localIP] = ResolveElevator(ElevState{LocalIP: localIP, LastFloor: <-floorChannel})
+	updateActiveElevators(knownElevators, activeElevators, localIP, iAmAliveLimit)
+	log.Println("MAIN:    State init finished. Starting from floor:", knownElevators[localIP].State.LastFloor)
+
+
+//------INIT TImer
+	//timeoutChannel := make(chan ExtendedElevOrder)
+	doorTimer := time.NewTimer(time.Second)
+	doorTimer.Stop()
+*/
+
+
+
 
 	doorCheck := func() {
 		time.Sleep(elevDelay)       //Sets it at right place
@@ -52,20 +121,6 @@ func main() {
 		lightChannel <- light
 		time.Sleep(openDoor)
 		light.Active = false
-		lightChannel <- light
-	}
-
-	buttonLightOn := func(flr int, btn int) {
-		light.Active = true
-		light.Type = btn
-		light.Floor = flr
-		lightChannel <- light
-	}
-
-	buttonLightOff := func(flr int, btn int) {
-		light.Active = false
-		light.Type = btn
-		light.Floor = flr
 		lightChannel <- light
 	}
 
@@ -81,8 +136,258 @@ func main() {
 		}
 		doorCheck()
 	}
+	
+	
+
+	
+	//go buttonLightOn(floorChannel, buttonChannel)
+	//ElevButton{Type: BUTTON_STOP}
+	//driver.ElevLight{Type: INDICATOR_DOOR, Active: True}
+
+	//if (motorChannel <- UP || motorChannel <- DOWN) {
+	//log.Println("Que: ",que(button , floor , buttonChannelMatrix))
+	for {
+/*
+select{
+	//-------HARDWARE-------
+		case button := <-buttonChannel:
+			log.Println("MAIN:\t Received a", ButtonType[button.Type], "from floor", button.Floor, ".Number of activeElevators", len(activeElevators))
+			switch button.Type {
+			case BUTTON_CALL_UP, BUTTON_CALL_DOWN:
+				if _, ok := activeElevators[localIP]; !ok {
+					log.Println("MAIN:\t Can not accept new external order while offline!")
+				} else {
+					if assignedIP, err := cost.AssignNewOrder(knownElevators, activeElevators, externalOrderMatrix, button.Floor, button.Type); err != nil {
+						log.Fatal(err)
+					} else {
+						sendOrderChannel <- ElevOrderMessage{
+							Floor:      button.Floor,
+							ButtonType: button.Type,
+							AssignedTo: assignedIP,
+							OriginIP:   localIP,
+							SenderIP:   localIP,
+							Event:      EvNewOrder,
+						}
+					}
+				}
+			case BUTTON_COMMAND:
+				if !knownElevators[localIP].State.IsMoving && knownElevators[localIP].State.LastFloor == button.Floor {
+					lightChannel <- elev.ElevLight{Type: INDICATOR_DOOR, Active: true}
+					log.Println("MAIN:\t Opening doors")
+					doorTimer.Reset(doorWaitTime)
+					knownElevators[localIP].State.DoorIsOpen = true
+					sendRestoreChannel <- ResolveBackupState(knownElevators[localIP], externalOrderMatrix)
+				} else {
+					printDebug("Added internal order to queue")
+					knownElevators[localIP].SetInternalOrder(button.Floor)
+					sendRestoreChannel <- ResolveBackupState(knownElevators[localIP], externalOrderMatrix)
+					lightChannel <- elev.ElevLight{Type: button.Type, Floor: button.Floor, Active: true}
+					if knownElevators[localIP].IsIdle() && !knownElevators[localIP].State.DoorIsOpen {
+						doorTimer.Reset(0 * time.Millisecond)
+					}
+				}
+
+			case BUTTON_STOP:
+				motorChannel <- STOP
+				lightChannel <- elev.ElevLight{Type: BUTTON_STOP, Active: true}
+				fmt.Println("\n---------------------         SOMEBODY KILLED THIS ELEVATOR!     ---------------------")
+				time.Sleep(200 * time.Millisecond)
+				os.Exit(1)
+			default:
+				printDebug("Recived an ButtonType from the elev driver")
+			}
+
+		case floor := <-floorChannel:
+			log.Println("MAIN:\t evFloorReached: ", floor)
+			knownElevators[localIP].SetLastFloor(floor)
+			if knownElevators[localIP].ResolveExtendedElevState(externalOrderMatrix).ShouldStop() {
+				motorChannel <- STOP
+				knownElevators[localIP].SetMoving(false)
+				log.Println("MAIN:\t Opening doors")
+				doorTimer.Reset(doorWaitTime)
+				lightChannel <- elev.ElevLight{Type: INDICATOR_DOOR, Active: true}
+				knownElevators[localIP].ClearInternalOrderAtCurrentFloor()
+				lightChannel <- elev.ElevLight{Floor: floor, Type: BUTTON_COMMAND, Active: false}
+				orders := knownElevators[localIP].ResolveExtendedElevState(externalOrderMatrix).FindExternalOrdersAtCurrentFloor()
+				for _, o := range orders {
+					externalOrderMatrix[o.Floor][o.Type].Status = NotActive
+					externalOrderMatrix[o.Floor][o.Type].AssignedTo = ""
+					externalOrderMatrix[o.Floor][o.Type].DeleteConfirmedBy()
+					printDebug("Stoping timeoutTimer [Execution timeout] on order " + ButtonType[o.Type] + " on floor " + strconv.Itoa(o.Floor))
+					externalOrderMatrix[o.Floor][o.Type].StopTimer()
+					lightChannel <- elev.ElevLight{Floor: o.Floor, Type: o.Type, Active: false}
+					externalOrderMatrix[o.Floor][o.Type].Timer = time.AfterFunc(ackTimeout, func() {
+						log.Println("TIMEOUT:\t An orderDone was not ack´d by all activeElevators. Resending...")
+						sendOrderChannel <- ElevOrderMessage{
+							Floor:      o.Floor,
+							ButtonType: o.Type,
+							AssignedTo: o.Order.AssignedTo,
+							OriginIP:   o.OriginIP,
+							SenderIP:   localIP,
+							Event:      EvOrderDone,
+						}
+					})
+					printDebug("Sending orderDoneMessage on " + ButtonType[o.Type] + " on floor " + strconv.Itoa(o.Floor))
+					sendOrderChannel <- ElevOrderMessage{
+						Floor:      o.Floor,
+						ButtonType: o.Type,
+						AssignedTo: o.Order.AssignedTo,
+						OriginIP:   o.OriginIP,
+						SenderIP:   localIP,
+						Event:      EvOrderDone,
+					}
+				}
+			}
+			sendRestoreChannel <- ResolveBackupState(knownElevators[localIP], externalOrderMatrix)
+		
+	}
+*/
+		//log.Println("Floorchannel: \n" ,floor) //0 -> 3
+		//fmt.Printf("ButtonChannel: %v \n" ,<- buttonChannel) //{0 0}
+		
+		select {
+		case btn := <-buttonChannel:
+			lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+			switch btn.Type {
+			//-----------------------------------------------External button
+			case 0: //-------------------UP BUTTON
+				switch btn.Floor {
+				case 0: //1.etg
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+					//buttonLightOn(0, BUTTON_CALL_UP)
+					gotoFloor(0)
+					//buttonLightOff(0, BUTTON_CALL_UP)
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 1: //2.etg
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+					//buttonLightOn(1, BUTTON_CALL_UP)
+					gotoFloor(1)
+					//buttonLightOff(1, BUTTON_CALL_UP)
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 2: //3.etg
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+					//buttonLightOn(2, BUTTON_CALL_UP)
+					gotoFloor(2)
+					//buttonLightOff(2, BUTTON_CALL_UP)
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 3: //4.etg
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+					//buttonLightOn(3, BUTTON_CALL_UP)
+					gotoFloor(3)
+					//buttonLightOff(3, BUTTON_CALL_UP)
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				}
+			case 1: //----------------------DOWN Button
+				switch btn.Floor {
+				case 0: //1.etg
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+					//buttonLightOn(0, BUTTON_CALL_DOWN)
+					gotoFloor(0)
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+					//buttonLightOff(0, BUTTON_CALL_DOWN)
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 1: //2.etg
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+					//buttonLightOn(1, BUTTON_CALL_DOWN)
+					gotoFloor(1)
+					//buttonLightOff(1, BUTTON_CALL_DOWN)
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 2: //3.etg
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+					//buttonLightOn(2, BUTTON_CALL_DOWN)
+					gotoFloor(2)
+					//buttonLightOff(2, BUTTON_CALL_DOWN)
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 3: //4.etg
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+					//buttonLightOn(3, BUTTON_CALL_DOWN)
+					gotoFloor(3)
+					//buttonLightOff(3, BUTTON_CALL_DOWN)
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				}
+				//---------------------------------------------Local button
+			case 2:
+				switch btn.Floor {
+				case 0: //1.etg
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+					//buttonLightOn(0, BUTTON_COMMAND)
+					gotoFloor(0)
+					//buttonLightOff(0, BUTTON_COMMAND)
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 1: //2.etg
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+					//buttonLightOn(1, BUTTON_COMMAND)
+					gotoFloor(1)
+					//buttonLightOff(1, BUTTON_COMMAND)
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 2: //3.etg
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+					//buttonLightOn(2, BUTTON_COMMAND)
+					gotoFloor(2)
+					//buttonLightOff(2, BUTTON_COMMAND)
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 3: //4.etg
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+					//buttonLightOn(3, BUTTON_COMMAND)
+					gotoFloor(3)
+					//buttonLightOff(3, BUTTON_COMMAND)
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				}
+			default:
+				log.Printf("Fail button")
+
+			} //switch
+
+		} //select
+		
+	} //for
+
+} //main
+
+/*
+//new functions
+func initNetwork(connectionAttempsLimit int, receiveOrderChannel, sendOrderChannel chan ElevOrderMessage, receiveRestoreChannel, sendRestoreChannel chan ElevRestoreMessage) (localIP string, err error) {
+	for i := 0; i <= connectionAttempsLimit; i++ {
+		localIP, err := network.Init(receiveOrderChannel, sendOrderChannel, receiveRestoreChannel, sendRestoreChannel)
+		if err != nil {
+			if i == 0 {
+				log.Println("MAIN:\t Network init was not successful. Trying some more times")
+			} else if i == connectionAttempsLimit {
+				return "", err
+			}
+			time.Sleep(3 * time.Second)
+		} else {
+			return localIP, nil
+		}
+	}
+	return "", nil
+}
 
 
+func updateActiveElevators(knownElevators map[string]*Elevator, activeElevators map[string]bool, localIP string, iAmAliveLimit time.Duration) {
+	for key := range knownElevators {
+		if time.Since(knownElevators[key].Time) > iAmAliveLimit {
+			if activeElevators[key] == true {
+				log.Printf("MAIN:\t Removed elevator %s in activeElevators\n", knownElevators[key].State.LocalIP)
+				delete(activeElevators, key)
+			}
+		} else {
+			if activeElevators[key] != true {
+				activeElevators[key] = true
+				log.Printf("MAIN:\t Added elevator %s in activeElevators\n", knownElevators[key].State.LocalIP)
+			}
+		}
+	}
+}
+
+
+func printDebug(s string) {
+	if debug {
+		log.Println("MAIN:\t", s)
+	}
+}
+
+/*
 	elevGetButtonSignal := func(buttonChannel int, floorChannel int, buttonChannelMatrix[][] int) bool {
 		if IoReadBit(buttonChannelMatrix[floor][button]) == true {
 			return true
@@ -116,87 +421,4 @@ func main() {
 
 		return q
 	}	
-
-
-	//go buttonLightOn(floorChannel, buttonChannel)
-	//ElevButton{Type: BUTTON_STOP}
-	//driver.ElevLight{Type: INDICATOR_DOOR, Active: True}
-
-	//if (motorChannel <- UP || motorChannel <- DOWN) {
-	//log.Println("Que: ",que(button , floor , buttonChannelMatrix))
-	for {
-		//log.Println("Floorchannel: \n" ,floor) //0 -> 3
-		//fmt.Printf("ButtonChannel: %v \n" ,<- buttonChannel) //{0 0}
-
-		select {
-		case btn := <-buttonChannel:
-			switch btn.Type {
-			//-----------------------------------------------External button
-			case 0: //-------------------UP BUTTON
-				switch btn.Floor {
-				case 0: //1.etg
-					buttonLightOn(0, BUTTON_CALL_UP)
-					gotoFloor(0)
-					buttonLightOff(0, BUTTON_CALL_UP)
-				case 1: //2.etg
-					//buttonLightOn(1, BUTTON_CALL_UP)
-					gotoFloor(1)
-					buttonLightOff(1, BUTTON_CALL_UP)
-				case 2: //3.etg
-					//buttonLightOn(2, BUTTON_CALL_UP)
-					gotoFloor(2)
-					buttonLightOff(2, BUTTON_CALL_UP)
-				case 3: //4.etg
-					//buttonLightOn(3, BUTTON_CALL_UP)
-					gotoFloor(3)
-					buttonLightOff(3, BUTTON_CALL_UP)
-				}
-			case 1: //----------------------DOWN Button
-				switch btn.Floor {
-				case 0: //1.etg
-					//buttonLightOn(0, BUTTON_CALL_DOWN)
-					gotoFloor(0)
-					buttonLightOff(0, BUTTON_CALL_DOWN)
-				case 1: //2.etg
-					//buttonLightOn(1, BUTTON_CALL_DOWN)
-					gotoFloor(1)
-					buttonLightOff(1, BUTTON_CALL_DOWN)
-				case 2: //3.etg
-					//buttonLightOn(2, BUTTON_CALL_DOWN)
-					gotoFloor(2)
-					buttonLightOff(2, BUTTON_CALL_DOWN)
-				case 3: //4.etg
-					//buttonLightOn(3, BUTTON_CALL_DOWN)
-					gotoFloor(3)
-					buttonLightOff(3, BUTTON_CALL_DOWN)
-				}
-				//---------------------------------------------Local button
-			case 2:
-				switch btn.Floor {
-				case 0: //1.etg
-					//buttonLightOn(0, BUTTON_COMMAND)
-					gotoFloor(0)
-					buttonLightOff(0, BUTTON_COMMAND)
-				case 1: //2.etg
-					//buttonLightOn(1, BUTTON_COMMAND)
-					gotoFloor(1)
-					buttonLightOff(1, BUTTON_COMMAND)
-				case 2: //3.etg
-					//buttonLightOn(2, BUTTON_COMMAND)
-					gotoFloor(2)
-					buttonLightOff(2, BUTTON_COMMAND)
-				case 3: //4.etg
-					//buttonLightOn(3, BUTTON_COMMAND)
-					gotoFloor(3)
-					buttonLightOff(3, BUTTON_COMMAND)
-				}
-			default:
-				log.Printf("Fail button")
-
-			} //switch
-
-		} //select
-
-	} //for
-
-} //main
+*/

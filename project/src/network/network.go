@@ -1,127 +1,96 @@
-/*
-package network
-
-
-import (
-	"fmt"
-	"net"
-	"strconv"
-)
-
-var LocAddr *net.UDPAddr //Local address
-var BroAddr *net.UDPAddr //Broadcast address
-
-type Udp_message struct {
-	Raddr  string //if receiving raddr=senders address, if sending raddr should be set to "broadcast" or an ip:port
-	Data   []byte //TODO: implement another encoding, strings are meh
-	Length int    //length of received data, in #bytes // N/A for sending
-}
-
-func UdpInit(localListenPort, broadcastListenPort, msgSize int, sendChan, recieveChan chan UdpMessage)(err error){
-	//generating broadcast address
-	BroAddr, err = net.ResolveUDPAddr("udp4", "255.255.255.255:"+strconv.Itoa(broadcastListenPort))
-	if err != nil{ return err }
-}	
-*/
-
-
-
-
 package network
 
 import (
-    "net"
-    "fmt"
+    . "../config"
+    "../udp"
+    "encoding/json"
     "log"
 )
 
-type ID string
-const InvalidID ID = ""
+const debug = false
 
-type Packet struct {
-    Address ID
-    Data    []byte
-}
-
-var client_port int = 10012
-var master_port int = 20012
-
-func getSenderID(sender *net.UDPAddr) ID {
-    return ID(sender.IP.String())
-}
-
-func GetMachineID() ID {
-    ifaces, err := net.InterfaceAddrs()
+func Init(reciveOrderChannel chan<- ElevOrderMessage,
+    sendOrderChannel <-chan ElevOrderMessage,
+    reciveRestoreChannel chan<- ElevRestoreMessage,
+    sendRestoreChannel <-chan ElevRestoreMessage) (localIP string, err error) {
+    const messageSize = 4 * 1024
+    const UDPLocalListenPort = 20002
+    const UDPBroadcastListenPort = 20007
+    UDPSendChannel := make(chan udp.UDPMessage, 10)
+    UDPReceiveChannel := make(chan udp.UDPMessage)
+    localIP, err = udp.Init(UDPLocalListenPort, UDPBroadcastListenPort, messageSize, UDPSendChannel, UDPReceiveChannel)
     if err != nil {
-        log.Fatal(err)
+        return "", err
     }
-    for _, addr := range(ifaces) {
-        if ip_addr, ok := addr.(*net.IPNet); ok && !ip_addr.IP.IsLoopback() {
-            if v4 := ip_addr.IP.To4(); v4 != nil {
-                return ID(v4.String())
+    go reciveMessageHandler(reciveOrderChannel, reciveRestoreChannel, UDPReceiveChannel)
+    go sendMessageHandler(sendOrderChannel, sendRestoreChannel, UDPSendChannel)
+    return localIP, nil
+}
+
+func reciveMessageHandler(reciveOrderChannel chan<- ElevOrderMessage, reciveRestoreChannel chan<- ElevRestoreMessage, UDPReceiveChannel <-chan udp.UDPMessage) {
+    for {
+        select {
+        case msg := <-UDPReceiveChannel:
+            var f interface{}
+            err := json.Unmarshal(msg.Data[:msg.Length], &f)
+            if err != nil {
+               // printDebug("Error with Unmarshaling a message.")
+                log.Println(err)
+            } else {
+                m := f.(map[string]interface{})
+                event := int(m["Event"].(float64))
+                if event <= 3 && event >= 0 {
+                    var restore = ElevRestoreMessage{}
+                    if err := json.Unmarshal(msg.Data[:msg.Length], &restore); err == nil {
+                        if restore.IsValid() {
+                            reciveRestoreChannel <- restore
+                            //printDebug("Recived an ElevRestoreMessage with Event " + EventType[restore.Event])
+                        } else {
+                           // printDebug("Rejected an ElevRestoreMessage with Event " + EventType[restore.Event])
+                        }
+                    } else {
+                        //printDebug("Error with Unmarshaling a ElevStateMessage")
+                    }
+                } else if event >= 4 && event <= 10 {
+                    var order = ElevOrderMessage{}
+                    if err := json.Unmarshal(msg.Data[:msg.Length], &order); err == nil {
+                        if order.IsValid() {
+                            reciveOrderChannel <- order
+                            //printDebug("Recived an ElevOrderMessage with Event " + EventType[order.Event])
+                        } else {
+                            //printDebug("Rejected an ElevOrderMessage with Event " + EventType[order.Event])
+                        }
+                    }
+                } else {
+                  //  printDebug("Recived an unknown message type")
+                }
             }
         }
     }
-    return "127.0.0.1"
 }
 
-func listen(socket *net.UDPConn, incoming chan Packet) {
+func sendMessageHandler(sendOrderChannel <-chan ElevOrderMessage, sendRestoreChannel <-chan ElevRestoreMessage, UDPSendChannel chan<- udp.UDPMessage) {
     for {
-        bytes := make([]byte, 1024)
-        read_bytes, sender, err := socket.ReadFromUDP(bytes)
-        if err == nil {
-            incoming <- Packet{getSenderID(sender), bytes[:read_bytes]}
-        } else {
-            log.Println(err)
+        select {
+        case msg := <-sendOrderChannel:
+            networkPack, err := json.Marshal(msg)
+            if err != nil {
+                //printDebug("Error Marshalling an outgoing message")
+                log.Println(err)
+            } else {
+                UDPSendChannel <- udp.UDPMessage{Raddr: "broadcast", Data: networkPack}
+               // printDebug("Sent an ElevOrderMessage with Event " + EventType[msg.Event])
+            }
+
+        case msg := <-sendRestoreChannel:
+            networkPack, err := json.Marshal(msg)
+            if err != nil {
+               // printDebug("Error Marshalling an outgoing message")
+                log.Println(err)
+            } else {
+                UDPSendChannel <- udp.UDPMessage{Raddr: "broadcast", Data: networkPack}
+                //printDebug("Sent an ElevOrderMessage with Event " + EventType[msg.Event])
+            }
         }
     }
 }
-
-func broadcast(socket *net.UDPConn, to_port int, outgoing chan Packet) {
-    bcast_addr := fmt.Sprintf("255.255.255.255:%d", to_port)
-    remote, err := net.ResolveUDPAddr("udp", bcast_addr)
-    if err != nil {
-        log.Fatal(err)
-    }
-    for {
-        packet := <- outgoing
-        _, err := socket.WriteToUDP(packet.Data, remote)
-        if err != nil {
-            log.Println(err)
-        }
-    }
-}
-
-func bind(port int) *net.UDPConn {
-    local, err := net.ResolveUDPAddr("udp", fmt.Sprintf(":%d", port))
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    socket, err := net.ListenUDP("udp", local)
-    if err != nil {
-        log.Fatal(err)
-    }
-    return socket
-}
-
-func ClientWorker(from_master, to_master chan Packet) {
-    socket := bind(client_port)
-    go listen(socket, from_master)
-    broadcast(socket, master_port, to_master)
-    socket.Close()
-}
-
-func MasterWorker(from_client, to_clients chan Packet) {
-    socket := bind(master_port)
-    go listen(socket, from_client)
-    broadcast(socket, client_port, to_clients)
-    socket.Close()
-}
-
-
-
-
-
-
-
