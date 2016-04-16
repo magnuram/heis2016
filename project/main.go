@@ -2,29 +2,12 @@
 package main
 
 import (
-	"./src/config"
+	. "./src/config"
 	"./src/elev"
 
 	"log"
 	"runtime"
 	"time"
-)
-
-const (
-	UP   = config.UP
-	STOP = config.STOP
-	DOWN = config.DOWN
-)
-
-const (
-	BUTTON_CALL_UP   = config.BUTTON_CALL_UP   //0
-	BUTTON_CALL_DOWN = config.BUTTON_CALL_DOWN // 1
-	BUTTON_COMMAND   = config.BUTTON_COMMAND   //2  ---Internal button
-	SENSOR_FLOOR     = config.SENSOR_FLOOR     //3
-	INDICATOR_FLOOR  = config.INDICATOR_FLOOR  //4
-	BUTTON_STOP      = config.BUTTON_STOP      //5 -- Doesn't use it
-	SENSOR_OBST      = config.SENSOR_OBST      //6 -- Doesn't use it
-	INDICATOR_DOOR   = config.INDICATOR_DOOR   //7
 )
 
 func main() {
@@ -97,14 +80,13 @@ func main() {
 		}
 		doorCheck()
 	}
-
+	//go buttonLightOn(floorChannel, buttonChannel)
 	//ElevButton{Type: BUTTON_STOP}
 	//driver.ElevLight{Type: INDICATOR_DOOR, Active: True}
 
 	//if (motorChannel <- UP || motorChannel <- DOWN) {
 
 	for {
-
 		//log.Println("Floorchannel: \n" ,floor) //0 -> 3
 		//fmt.Printf("ButtonChannel: %v \n" ,<- buttonChannel) //{0 0}
 
@@ -112,41 +94,41 @@ func main() {
 		case btn := <-buttonChannel:
 			switch btn.Type {
 			//-----------------------------------------------External button
-			case 0: //-------------------Down Button
+			case 0: //-------------------UP BUTTON
 				switch btn.Floor {
 				case 0: //1.etg
-					//buttonLightOn(0, BUTTON_CALL_UP)
+					buttonLightOn(0, BUTTON_CALL_UP)
 					gotoFloor(0)
-					//buttonLightOff(0, BUTTON_CALL_UP)
+					buttonLightOff(0, BUTTON_CALL_UP)
 				case 1: //2.etg
 					//buttonLightOn(1, BUTTON_CALL_UP)
 					gotoFloor(1)
-					//buttonLightOff(1, BUTTON_CALL_UP)
+					buttonLightOff(1, BUTTON_CALL_UP)
 				case 2: //3.etg
 					//buttonLightOn(2, BUTTON_CALL_UP)
 					gotoFloor(2)
-					//buttonLightOff(2, BUTTON_CALL_UP)
+					buttonLightOff(2, BUTTON_CALL_UP)
 				case 3: //4.etg
 					//buttonLightOn(3, BUTTON_CALL_UP)
 					gotoFloor(3)
-					//buttonLightOff(3, BUTTON_CALL_UP)
+					buttonLightOff(3, BUTTON_CALL_UP)
 				}
-			case 1: //----------------------Up Button
+			case 1: //----------------------DOWN Button
 				switch btn.Floor {
 				case 0: //1.etg
-					buttonLightOn(0, BUTTON_CALL_DOWN)
+					//buttonLightOn(0, BUTTON_CALL_DOWN)
 					gotoFloor(0)
 					buttonLightOff(0, BUTTON_CALL_DOWN)
 				case 1: //2.etg
-					buttonLightOn(1, BUTTON_CALL_DOWN)
+					//buttonLightOn(1, BUTTON_CALL_DOWN)
 					gotoFloor(1)
 					buttonLightOff(1, BUTTON_CALL_DOWN)
 				case 2: //3.etg
-					buttonLightOn(2, BUTTON_CALL_DOWN)
+					//buttonLightOn(2, BUTTON_CALL_DOWN)
 					gotoFloor(2)
 					buttonLightOff(2, BUTTON_CALL_DOWN)
 				case 3: //4.etg
-					buttonLightOn(3, BUTTON_CALL_DOWN)
+					//buttonLightOn(3, BUTTON_CALL_DOWN)
 					gotoFloor(3)
 					buttonLightOff(3, BUTTON_CALL_DOWN)
 				}
@@ -154,19 +136,19 @@ func main() {
 			case 2:
 				switch btn.Floor {
 				case 0: //1.etg
-					buttonLightOn(0, BUTTON_COMMAND)
+					//buttonLightOn(0, BUTTON_COMMAND)
 					gotoFloor(0)
 					buttonLightOff(0, BUTTON_COMMAND)
 				case 1: //2.etg
-					buttonLightOn(1, BUTTON_COMMAND)
+					//buttonLightOn(1, BUTTON_COMMAND)
 					gotoFloor(1)
 					buttonLightOff(1, BUTTON_COMMAND)
 				case 2: //3.etg
-					buttonLightOn(2, BUTTON_COMMAND)
+					//buttonLightOn(2, BUTTON_COMMAND)
 					gotoFloor(2)
 					buttonLightOff(2, BUTTON_COMMAND)
 				case 3: //4.etg
-					buttonLightOn(3, BUTTON_COMMAND)
+					//buttonLightOn(3, BUTTON_COMMAND)
 					gotoFloor(3)
 					buttonLightOff(3, BUTTON_COMMAND)
 				}
