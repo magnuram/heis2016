@@ -4,7 +4,7 @@ package main
 import (
 	. "./src/config"
 	"./src/elev"
-
+	. "./src/queue"
 	"log"
 	"runtime"
 	"time"
@@ -85,7 +85,7 @@ func main() {
 	//driver.ElevLight{Type: INDICATOR_DOOR, Active: True}
 
 	//if (motorChannel <- UP || motorChannel <- DOWN) {
-
+	log.Println(Que())
 	for {
 		//log.Println("Floorchannel: \n" ,floor) //0 -> 3
 		//fmt.Printf("ButtonChannel: %v \n" ,<- buttonChannel) //{0 0}

@@ -5,7 +5,7 @@ import (
 	. "../channels"
 	. "../config"
 	. "../driver"
-
+	//. "../queue"
 	"log"
 	"math"
 	"time"
@@ -56,7 +56,9 @@ func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, mo
 	if getFloorSensorSignal() == -1 {
 		motorChannel <- DOWN
 		for {
-
+			//var floor  driver.ElevInfo
+			//var elevator config.ElevInfo
+			//elevator.Dir = elevator_type.Stop
 			if getFloorSensorSignal() != -1 {
 				motorChannel <- STOP
 				break
@@ -185,6 +187,14 @@ func setFloorIndicator(floor int) { //works
 		IoSetBit(LIGHT_FLOOR_IND2)
 	} else {
 		IoClearBit(LIGHT_FLOOR_IND2)
+	}
+}
+
+func ElevGetButtonSignal(button int, floor int) bool {
+	if IoReadBit(buttonChannelMatrix[floor][button]) == true {
+		return true
+	} else {
+		return false
 	}
 }
 

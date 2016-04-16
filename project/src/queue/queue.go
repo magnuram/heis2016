@@ -3,9 +3,13 @@ package queue
 import (
 	//. "../driver"
 	. "../config"
-	//. "../elev"
+	. "../driver"
+	. "../elev"
+	//"container/list"
+	//"fmt"
 )
 
+/*
 func QOrderExist() bool {
 	for i := 0; i < N_FLOORS; i++ {
 		if Elinf.ReqLocal[i] != 0 || Elinf.ReqUp[i] != 0 || Elinf.ReqDown[i] != 0 {
@@ -16,7 +20,7 @@ func QOrderExist() bool {
 }
 
 func QSetLight(){
-	for :=0 ; i < N_FLOORS; i++{
+	for i :=0 ; i < N_FLOORS; i++{
 		ElevLight{Type:BUTTON_COMMAND ,Floor: i, Active: Elinf.ReqLocal}
 		if i != 0{
 		ElevLight{Type: BUTTON_CALL_DOWN,Floor: i, Active: Elinf.ReqDown}
@@ -32,7 +36,7 @@ func QAddOrder(flr int, buttonchannel <-chan ElevButton) {
 	select{
 		case btn := <-buttonChannel
 		switch btn.Type{
-		case 0: //button call up 
+		case 0: //button call up
 			Elinf.ReqUp[flr] = 1
 		case 1:
 			Elinf.ReqDown[flr] = 1
@@ -46,7 +50,7 @@ func QOrdersAbove(currentFloor int) bool{
 		for flr := currentFloor+1;  flr<N_FLOORS; flr++ {
 		if Elinf.ReqLocal[i] != 0 || Elinf.ReqUp[i] != 0 || Elinf.ReqDown[i] != 0{
 			return true
-		} 
+		}
 	}
 	return false
 }
@@ -55,10 +59,10 @@ func QOrdersBelow(currentFloor int) bool {
 	for flr := currentFloor+1;  flr<currentFloor; flr++ {
 		if Elinf.ReqLocal[i] != 0 || Elinf.ReqUp[i] != 0 || Elinf.ReqDown[i] != 0{
 			return true
-		} 
+		}
 	}
 	return false
-	
+
 }
 
 func QChooseDir(currentFloor int, prevDir int)int{
@@ -117,7 +121,7 @@ func QDeleteOrders() {
 		Elinf.ReqLocal[i] = 0
 	}
 	QSetLight()
-	
+
 }
 
 func QDeleteManual(flr int){
@@ -125,4 +129,31 @@ func QDeleteManual(flr int){
 		Elinf.ReqDown[flr] = 0
 		Elinf.ReqLocal[flr] = 0
 		QSetLight()
+}
+*/
+func Que() {
+
+	var BtnChnl_UpList []int
+	var BtnChnl_DownList []int
+	var que []int
+	var newFloor bool
+
+	for {
+		newFloor = ElevGetButtonSignal(buttonChannel chan<- int btn, floorChannel chan<- int flr)
+		//var q [][][] int = IoReadBit(buttonChannelMatrix[floor][button])
+		//currentFloor = ElevGetFloorSensorSignal()
+		BtnChnl_UpList = buttonChannelMatrix[0] + buttonChannelMatrix[0] + buttonChannelMatrix[0] + buttonChannelMatrix[0]
+		BtnChnl_DownList = buttonChannelMatrix[1] + buttonChannelMatrix[1] + buttonChannelMatrix[1] + buttonChannelMatrix[1]
+		//BtnChnlMtrx_Command[] = buttonChannelMatrix{2,2,2,2}
+
+		if IoReadBit(MOTORDIR) == true {
+			que = BtnChnl_UpList + BtnChnl_DownList
+		}
+		if IoReadBit(MOTORDIR) == false {
+			que = BtnChnl_DownList + BtnChnl_UpList
+		}
+
+	}
+
+	return que
 }
