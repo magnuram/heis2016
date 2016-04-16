@@ -2,9 +2,9 @@ package queue
 
 import (
 	//. "../driver"
-	. "../config"
-	. "../driver"
-	. "../elev"
+	//. "../config"
+	//. "../driver"
+	//. "../elev"
 	//"container/list"
 	//"fmt"
 )
@@ -131,15 +131,16 @@ func QDeleteManual(flr int){
 		QSetLight()
 }
 */
-func Que() {
+
+/*
+func Que(button int , floor int, buttonChannelMatrix int) {
 
 	var BtnChnl_UpList []int
 	var BtnChnl_DownList []int
 	var que []int
-	var newFloor bool
+	//var buttonbool bool
 
-	for {
-		newFloor = ElevGetButtonSignal(buttonChannel chan<- int btn, floorChannel chan<- int flr)
+	for ElevGetButtonSignal(button, floor) == true {
 		//var q [][][] int = IoReadBit(buttonChannelMatrix[floor][button])
 		//currentFloor = ElevGetFloorSensorSignal()
 		BtnChnl_UpList = buttonChannelMatrix[0] + buttonChannelMatrix[0] + buttonChannelMatrix[0] + buttonChannelMatrix[0]
@@ -157,3 +158,5 @@ func Que() {
 
 	return que
 }
+
+*/

@@ -4,7 +4,8 @@ package main
 import (
 	. "./src/config"
 	"./src/elev"
-	. "./src/queue"
+	//. "./src/queue"
+	. "./src/driver"
 	"log"
 	"runtime"
 	"time"
@@ -80,12 +81,49 @@ func main() {
 		}
 		doorCheck()
 	}
+
+
+	elevGetButtonSignal := func(buttonChannel int, floorChannel int, buttonChannelMatrix[][] int) bool {
+		if IoReadBit(buttonChannelMatrix[floor][button]) == true {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	que := func(button int , floor int, buttonChannelMatrix [][] int) {
+
+		var BtnChnl_UpList []int
+		var BtnChnl_DownList []int
+		var q []int
+		//var buttonbool bool
+
+		for elevGetButtonSignal(buttonChannel int, floorChannel int , buttonChannelMatrix int) == true {
+			//var q [][][] int = IoReadBit(buttonChannelMatrix[floor][button])
+			//currentFloor = ElevGetFloorSensorSignal()
+			BtnChnl_UpList = buttonChannelMatrix[0] + buttonChannelMatrix[0] + buttonChannelMatrix[0] + buttonChannelMatrix[0]
+			BtnChnl_DownList = buttonChannelMatrix[1] + buttonChannelMatrix[1] + buttonChannelMatrix[1] + buttonChannelMatrix[1]
+			//BtnChnlMtrx_Command[] = buttonChannelMatrix{2,2,2,2}
+
+			if IoReadBit(MOTORDIR) == true {
+				q = BtnChnl_UpList + BtnChnl_DownList
+			}
+			if IoReadBit(MOTORDIR) == false {
+				q = BtnChnl_DownList + BtnChnl_UpList
+			}
+
+		}
+
+		return q
+	}	
+
+
 	//go buttonLightOn(floorChannel, buttonChannel)
 	//ElevButton{Type: BUTTON_STOP}
 	//driver.ElevLight{Type: INDICATOR_DOOR, Active: True}
 
 	//if (motorChannel <- UP || motorChannel <- DOWN) {
-	log.Println(Que())
+	//log.Println("Que: ",que(button , floor , buttonChannelMatrix))
 	for {
 		//log.Println("Floorchannel: \n" ,floor) //0 -> 3
 		//fmt.Printf("ButtonChannel: %v \n" ,<- buttonChannel) //{0 0}
