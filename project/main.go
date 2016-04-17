@@ -4,6 +4,7 @@ package main
 import (
 	. "./src/config"
 	"./src/elev"
+	//"./src/driver"
 	// "./src/network"
 	// "./src/cost"
 	"log"
@@ -42,7 +43,7 @@ func main() {
 
 //------------------------Init Hardware
 	log.Println("Main: \t Start in main")
-	buttonChannel := make(chan elev.ElevButton, 10)
+	buttonChannel := make(chan elev.ElevButton, 100)
 	lightChannel := make(chan elev.ElevLight)
 	//elevinfoChannel := make(chan driver.ElevInfo)
 	motorChannel := make(chan int)
@@ -61,7 +62,7 @@ func main() {
 	}
 
 
-//----------Init simple error handling
+//----------Init simple kill channel
 	killChan := make(chan os.Signal)
 	signal.Notify(killChan, os.Interrupt)
 	go func() {
@@ -76,9 +77,15 @@ func main() {
 
 //--------Init network
 	receiveOrderChannel := make(chan ElevOrderMessage, 5)
+	
+
 	sendOrderChannel := make(chan ElevOrderMessage)
+	
+	
 	receiveRestoreChannel := make(chan ElevRestoreMessage, 5)
-	sendRestoreChannel := make(chan ElevRestoreMessage)
+	
+	//sendRestoreChannel := make(chan ElevRestoreMessage)
+	
 	localIP, err := initNetwork(connectionAttempsLimit, receiveOrderChannel, sendOrderChannel, receiveRestoreChannel, sendRestoreChannel)
 	if err != nil {
 		log.Println("MAIN:\t Network init failed")
@@ -88,9 +95,9 @@ func main() {
 	}
 */
 
+	//var button = <-buttonChannel
 	var floor = <-floorChannel
 	var light elev.ElevLight
-
 /*
 //-----Initialise state------
 	log.Println("MAIN:    Sending out a request after my previous state")
@@ -99,11 +106,11 @@ func main() {
 		State:   ElevState{},
 		Event:   EvRequestingState,
 	}
-	knownElevators[localIP] = ResolveElevator(ElevState{LocalIP: localIP, LastFloor: <-floorChannel})
-	updateActiveElevators(knownElevators, activeElevators, localIP, iAmAliveLimit)
-	log.Println("MAIN:    State init finished. Starting from floor:", knownElevators[localIP].State.LastFloor)
+	//knownElevators[localIP] = ResolveElevator(ElevState{LocalIP: localIP, LastFloor: <-floorChannel})
+//	updateActiveElevators(knownElevators, activeElevators, localIP, iAmAliveLimit)
+	log.Println("MAIN:    State init finished. Starting from floor:", floor)//knownElevators[localIP].State.LastFloor)
 
-
+/*
 //------INIT TImer
 	//timeoutChannel := make(chan ExtendedElevOrder)
 	doorTimer := time.NewTimer(time.Second)
@@ -124,7 +131,7 @@ func main() {
 		lightChannel <- light
 	}
 
-	gotoFloor := func(flr int) { //Makes the elevator go to the floor
+	gotoFloor :=  func( flr int) { //Makes the elevator go to the floor
 
 		if floor > flr {
 			motorChannel <- DOWN
@@ -134,9 +141,101 @@ func main() {
 		for floor != flr {
 			floor = <-floorChannel
 		}
-		doorCheck()
+		 doorCheck()
 	}
-	
+/*
+	go func() {
+		//for driver.IoReadBit(buttonChannel) {
+			lightChannel <- elev.ElevLight{Type: button.Type, Floor: button.Floor, Active: true}
+		//}
+	}()
+*/	
+
+	go func () {
+		for{
+			//btn := <-buttonChannel
+			//lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+		select {
+		case btn := <-buttonChannel:
+			lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+			switch btn.Type {
+			//-----------------------------------------------External button
+			case 0: //-------------------UP BUTTON
+				switch btn.Floor {
+				case 0: //1.etg
+					 //gotoFloor(0)
+				log.Println("1.etg UP")
+				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 1: //2.etg
+					//gotoFloor(1)
+				log.Println("2.etg UP")
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 2: //3.etg
+
+					//gotoFloor(2)
+				log.Println("3.etg UP")
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 3: //4.etg ---------DOEST EXIST
+
+					//gotoFloor(3)
+				log.Println("4.etg UP")
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				}
+			case 1: //----------------------DOWN Button
+				switch btn.Floor {
+				case 0: //1.etg  ---------- DOESNT EXIST
+				log.Println("1.etg DOWN")
+					// gotoFloor(0)
+
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 1: //2.etg
+
+					//gotoFloor(1)
+				log.Println("2.etg DOWN")
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 2: //3.etg
+
+					//gotoFloor(2)
+				log.Println("3.etg DOWN")
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 3: //4.etg
+				log.Println("4.etg DOWN")
+					//gotoFloor(3)
+
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				}
+				//---------------------------------------------Local button
+			case 2:
+				switch btn.Floor {
+				case 0: //1.etg
+					log.Println("1.etg local")
+					 gotoFloor(0)
+
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 1: //2.etg
+
+					 gotoFloor(1)
+					log.Println("2.etg local")
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 2: //3.etg
+
+					//gotoFloor(2)
+					log.Println("3.etg local")
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				case 3: //4.etg
+					log.Println("4.etg local")
+					//gotoFloor(3)
+					
+					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+				}
+			default:
+				log.Printf("Fail button")
+
+			} //switch
+
+		} //select
+	}
+	}()
 	
 
 	
@@ -147,6 +246,7 @@ func main() {
 	//if (motorChannel <- UP || motorChannel <- DOWN) {
 	//log.Println("Que: ",que(button , floor , buttonChannelMatrix))
 	for {
+		
 /*
 select{
 	//-------HARDWARE-------
@@ -244,93 +344,78 @@ select{
 */
 		//log.Println("Floorchannel: \n" ,floor) //0 -> 3
 		//fmt.Printf("ButtonChannel: %v \n" ,<- buttonChannel) //{0 0}
-		
+	/*	
 		select {
 		case btn := <-buttonChannel:
-			lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+		//	lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
 			switch btn.Type {
 			//-----------------------------------------------External button
 			case 0: //-------------------UP BUTTON
 				switch btn.Floor {
 				case 0: //1.etg
-				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
-					//buttonLightOn(0, BUTTON_CALL_UP)
 					gotoFloor(0)
-					//buttonLightOff(0, BUTTON_CALL_UP)
+
 				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 				case 1: //2.etg
-				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
-					//buttonLightOn(1, BUTTON_CALL_UP)
 					gotoFloor(1)
-					//buttonLightOff(1, BUTTON_CALL_UP)
+
 					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 				case 2: //3.etg
-				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
-					//buttonLightOn(2, BUTTON_CALL_UP)
+
 					gotoFloor(2)
-					//buttonLightOff(2, BUTTON_CALL_UP)
+
 					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 				case 3: //4.etg
-				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
-					//buttonLightOn(3, BUTTON_CALL_UP)
+
 					gotoFloor(3)
-					//buttonLightOff(3, BUTTON_CALL_UP)
+
 					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 				}
 			case 1: //----------------------DOWN Button
 				switch btn.Floor {
 				case 0: //1.etg
-				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
-					//buttonLightOn(0, BUTTON_CALL_DOWN)
+
 					gotoFloor(0)
-					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
-					//buttonLightOff(0, BUTTON_CALL_DOWN)
+
 					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 				case 1: //2.etg
-				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
-					//buttonLightOn(1, BUTTON_CALL_DOWN)
+
 					gotoFloor(1)
-					//buttonLightOff(1, BUTTON_CALL_DOWN)
+
 					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 				case 2: //3.etg
-				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
-					//buttonLightOn(2, BUTTON_CALL_DOWN)
+
 					gotoFloor(2)
-					//buttonLightOff(2, BUTTON_CALL_DOWN)
+
 					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 				case 3: //4.etg
-				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
-					//buttonLightOn(3, BUTTON_CALL_DOWN)
+
 					gotoFloor(3)
-					//buttonLightOff(3, BUTTON_CALL_DOWN)
+
 					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 				}
 				//---------------------------------------------Local button
 			case 2:
 				switch btn.Floor {
 				case 0: //1.etg
-				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
-					//buttonLightOn(0, BUTTON_COMMAND)
+
 					gotoFloor(0)
-					//buttonLightOff(0, BUTTON_COMMAND)
+
 					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 				case 1: //2.etg
-				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
-					//buttonLightOn(1, BUTTON_COMMAND)
+
 					gotoFloor(1)
-					//buttonLightOff(1, BUTTON_COMMAND)
+
 					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 				case 2: //3.etg
-				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
-					//buttonLightOn(2, BUTTON_COMMAND)
+
 					gotoFloor(2)
-					//buttonLightOff(2, BUTTON_COMMAND)
+
 					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 				case 3: //4.etg
-				lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
-					//buttonLightOn(3, BUTTON_COMMAND)
+
 					gotoFloor(3)
-					//buttonLightOff(3, BUTTON_COMMAND)
+
 					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 				}
 			default:
@@ -339,8 +424,9 @@ select{
 			} //switch
 
 		} //select
-		
+		*/
 	} //for
+
 
 } //main
 
@@ -422,3 +508,5 @@ func printDebug(s string) {
 		return q
 	}	
 */
+	//btn := <-buttonChannel
+			

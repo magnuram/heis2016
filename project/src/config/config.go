@@ -14,12 +14,6 @@ const UP = 1
 const STOP = 0
 const DOWN = -1
 
-var MotorCommands = [3]string{
-	"DOWN",
-	"STOP",
-	"UP",
-}
-
 //Enumerator
 const (
 	BUTTON_CALL_UP = iota
@@ -31,6 +25,17 @@ const (
 	SENSOR_OBST
 	INDICATOR_DOOR
 )
+
+type ElevSave struct{
+ NewFloor int
+ OldFloor int
+
+
+} 
+
+
+
+
 
 const (
 	EvIAmAlive = iota
@@ -51,6 +56,14 @@ const ( //ElevOrder status
 	Awaiting
 	UnderExecution
 )
+
+
+
+var MotorCommands = [3]string{
+	"DOWN",
+	"STOP",
+	"UP",
+}
 
 var ElevOrderStatus = []string{
 	"NotActive",
