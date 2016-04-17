@@ -186,16 +186,8 @@ func setFloorIndicator(floor int) { //works
 		IoClearBit(LIGHT_FLOOR_IND2)
 	}
 }
-/*
-func ElevGetButtonSignal(button int, floor int) bool {
-	if IoReadBit(buttonChannelMatrix[floor][button]) == true {
-		return true
-	} else {
-		return false
-	}
-}
-*/
-func ElevGetStopSignal() bool {
+
+func ElevGetStopSignal() bool {	 //not going to use
 	return IoReadBit(STOP_BUTTON)
 }
 
