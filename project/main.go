@@ -53,22 +53,19 @@ func main() {
 	}()
 
 	var floor = <-floorChannel
-	var light elev.ElevLight
 
 	doorCheck := func() {
 		time.Sleep(elevDelay)       //Times Elevator at right place
 		motorChannel <- STOP        // Stops any initial elevator movement
-		light.Active = true         // Makes "door open" light for all elevators active
-		light.Type = IndicatorDoor // Describes
-		lightChannel <- light
+		lightChannel <- elev.ElevLight{Type: IndicatorDoor,  Active: ON} //Turns ON door indicator 
+
+		time.Sleep(openDoor)  
 		
-		time.Sleep(openDoor)
-		light.Active = false
-		lightChannel <- light
+		lightChannel <- elev.ElevLight{Type: IndicatorDoor,  Active: OFF} //Turns OFF door indicator
 
 	}
 
-	gotoFloor := func(flr int) { //Makes the elevator go to the floor
+	gotoFloor := func(typ int, flr int) { //Makes the elevator go to the floor
 
 		if floor > flr {
 			motorChannel <- DOWN
@@ -79,13 +76,14 @@ func main() {
 			floor = <-floorChannel	
 		}
 		 doorCheck()
+		 lightChannel <- elev.ElevLight{Type: typ, Floor: flr, Active: OFF} //Turns OFF button light
 	}
 
 	for {
 
 		select {
 			case btn := <-buttonChannel:
-			lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
+			lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: ON} //Turns ON button light
 			switch btn.Type {
 			//-----------------------------------------------External button
 				case UpButton: //------------------------------------------------UP Button
@@ -93,18 +91,15 @@ func main() {
 
 					case FirstFloor: //1.etg
 						log.Println("First floor: UP button pressed")
-					 	gotoFloor(btn.Floor)
-						lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+					 	gotoFloor(btn.Type,btn.Floor)
 
 					case SecondFloor: //2.etg
 						log.Println("Second floor: UP button pressed")
-						gotoFloor(btn.Floor)
-						lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+						gotoFloor(btn.Type,btn.Floor)
 
 					case ThirdFloor: //3.etg
 						log.Println("Third floor: UP button pressed")
-						gotoFloor(btn.Floor)
-						lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+						gotoFloor(btn.Type,btn.Floor)
 				}
 
 				case DownButton: //----------------------------------------------DOWN Button
@@ -112,18 +107,15 @@ func main() {
 
 						case SecondFloor: //2.etg
 							log.Println("Second floor: DOWN button pressed")
-							gotoFloor(btn.Floor)
-							lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+							gotoFloor(btn.Type,btn.Floor)
 
 						case ThirdFloor: //3.etg
 							log.Println("Third floor: DOWN button pressed")
-							gotoFloor(btn.Floor)					
-							lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+							gotoFloor(btn.Type,btn.Floor)					
 
 						case FourthFloor: //4.etg
 							log.Println("Fourth floor: DOWN button pressed")
-							gotoFloor(btn.Floor)
-							lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+							gotoFloor(btn.Type,btn.Floor)
 					}
 					
 				case LocalButton: //---------------------------------------------LOCAL Button
@@ -131,23 +123,19 @@ func main() {
 
 						case FirstFloor: //1.etg
 							log.Println("First floor: LOCAL button pressed")
-							gotoFloor(btn.Floor)
-							lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+							gotoFloor(btn.Type,btn.Floor)
 
 						case SecondFloor: //2.etg
 							log.Println("Second floor: LOCAL button pressed")
-							gotoFloor(btn.Floor)
-							lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+							gotoFloor(btn.Type,btn.Floor)
 
 						case ThirdFloor: //3.etg
 							log.Println("Third floor: LOCAL button pressed")
-							gotoFloor(btn.Floor)
-							lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+							gotoFloor(btn.Type,btn.Floor)
 
 						case FourthFloor: //4.etg
 							log.Println("Fourth floor: LOCAL button pressed")
-							gotoFloor(btn.Floor)
-							lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
+							gotoFloor(btn.Type,btn.Floor)
 					}
 				default:
 				log.Printf("Fail button")

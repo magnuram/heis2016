@@ -33,3 +33,9 @@ SecondFloor
 ThirdFloor
 FourthFloor
 )
+
+//lights on or off
+const(
+	ON	= true
+	OFF = false
+)
