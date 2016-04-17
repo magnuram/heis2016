@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	N_FLOORS  = 4 //Number of floors, Hardware-depentent
+	NumbrOfFloors  = 4 //Number of floors, Hardware-depentent
 	N_BUTTONS = 3 //Number of buttons/lamps on a per-floor basis
 )
 
@@ -63,14 +63,14 @@ type ElevLight struct {
 	Active bool
 }
 
-var lampChannelMatrix = [N_FLOORS][3]int{
+var lampChannelMatrix = [NumbrOfFloors][3]int{
 	{LIGHT_UP1, LIGHT_DOWN1, LIGHT_COMMAND1},
 	{LIGHT_UP2, LIGHT_DOWN2, LIGHT_COMMAND2},
 	{LIGHT_UP3, LIGHT_DOWN3, LIGHT_COMMAND3},
 	{LIGHT_UP4, LIGHT_DOWN4, LIGHT_COMMAND4},
 }
 
-var buttonChannelMatrix = [N_FLOORS][3]int{
+var buttonChannelMatrix = [NumbrOfFloors][3]int{
 	{BUTTON_UP1, BUTTON_DOWN1, BUTTON_COMMAND1},
 	{BUTTON_UP2, BUTTON_DOWN2, BUTTON_COMMAND2},
 	{BUTTON_UP3, BUTTON_DOWN3, BUTTON_COMMAND3},
@@ -111,11 +111,11 @@ func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, mo
 }
 
 func readInput(buttonchannel chan<- ElevButton, elevDelay time.Duration) {
-	inputMatrix := [N_FLOORS][3]bool{}
+	inputMatrix := [NumbrOfFloors][3]bool{}
 	var stopbtn bool = false
 	for {
 		for Type := BUTTON_CALL_UP; Type <= BUTTON_COMMAND; Type++ {
-			for Floor := 0; Floor < N_FLOORS; Floor++ {
+			for Floor := 0; Floor < NumbrOfFloors; Floor++ {
 				tempbtn := IoReadBit(buttonChannelMatrix[Floor][Type])
 				if tempbtn { // button been pressed
 					if !inputMatrix[Floor][Type] {
@@ -206,9 +206,9 @@ func elevSetMotorDirection(motorChannel <-chan int) {
 }
 
 func setFloorIndicator(floor int) {
-	if floor >= N_FLOORS {
-		floor = N_FLOORS - 1
-		log.Println("Elev: \t Tried to set the light indicator to the one over", N_FLOORS-1)
+	if floor >= NumbrOfFloors {
+		floor = NumbrOfFloors - 1
+		log.Println("Elev: \t Tried to set the light indicator to the one over", NumbrOfFloors-1)
 	} else if floor < 0 {
 		floor = 0
 		log.Println("Elev: \t Tried to set the light indicator to under 0")
@@ -251,7 +251,7 @@ func ElevGetObstructuionSignal() bool { //not going to use
 func clearAlllights() {
 	//Set at floor button lamps off
 	for Type := BUTTON_CALL_UP; Type <= BUTTON_COMMAND; Type++ { //buttonCallUp = 1 Button_command = 3
-		for Floor := 0; Floor < N_FLOORS; Floor++ {
+		for Floor := 0; Floor < NumbrOfFloors; Floor++ {
 			IoClearBit(lampChannelMatrix[Floor][Type])
 		}
 	}

@@ -136,7 +136,15 @@ func main() {
 		lightChannel <- light
 	}
 
-	gotoFloor := func(flr int) { //Makes the elevator go to the floor
+	gotoFloor := func(btn int, flr int) { //Makes the elevator go to the floor
+
+		go func() {
+			if flr != -1 {
+				lightChannel <- elev.ElevLight{Type: btn, Floor: flr, Active: true}
+			}else {
+				lightChannel <- elev.ElevLight{Type: btn, Floor: flr, Active: false}
+			}
+		}()
 
 		if floor > flr {
 			motorChannel <- DOWN
@@ -201,60 +209,60 @@ func main() {
 			lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: true}
 			switch btn.Type {
 			//-----------------------------------------------External button
-				case 0: //-------------------UP BUTTON
+				case UpButton: //-------------------UP BUTTON
 				switch btn.Floor {
-					case 0: //1.etg
+					case FirstFloor: //1.etg
 					//q_type = append(q_type,btn.Type)//,[btn.Floor]int)
 					//q_floor = append(q_floor,btn.Floor)
 					//log.Println("Quetype: ",q_type)
 					//log.Println("Quefloor: ",q_floor)
 						log.Println("1.etg UP")
-					 gotoFloor(0)
+					 gotoFloor(btn.Type , btn.Floor)
 
 				
 					
 					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 
-					case 1: //2.etg
+					case SecondFloor: //2.etg
 					//q_type = append(q_type,btn.Type)//,[btn.Floor]int)
 					//q_floor = append(q_floor,btn.Floor)
 					//log.Println("Quetype: ",q_type)
 					//log.Println("Quefloor: ",q_floor)
 					log.Println("2.etg UP")
-						gotoFloor(1)
+						gotoFloor(btn.Type , btn.Floor)
 
 					
 				
 						lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 
-					case 2: //3.etg
+					case ThirdFloor: //3.etg
 					//q_type = append(q_type,btn.Type)//,[btn.Floor]int)
 					//q_floor = append(q_floor,btn.Floor)
 					//log.Println("Quetype: ",q_type)
 					//log.Println("Quefloor: ",q_floor)
 					log.Println("3.etg UP")
-						gotoFloor(2)
+						gotoFloor(btn.Type , btn.Floor)
 
 					
 					
 						lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 
-					case 3: //4.etg ---------DOEST EXIST
+					case FourthFloor: //4.etg ---------DOEST EXIST
 					//q_type = append(q_type,btn.Type)//,[btn.Floor]int)
 					//q_floor = append(q_floor,btn.Floor)
 					//log.Println("Quetype: ",q_type)
 					//log.Println("Quefloor: ",q_floor)
 					log.Println("4.etg UP")
-						gotoFloor(3)
+						gotoFloor(btn.Type , btn.Floor)
 
 					
 					
 						lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 			
 				}
-				case 1: //----------------------DOWN Button
+				case DownButton: //----------------------DOWN Button
 				switch btn.Floor {
-					case 0: //1.etg  ---------- DOESNT EXIST
+					case FirstFloor: //1.etg  ---------- DOESNT EXIST
 					//q_type = append(q_type,btn.Type)//,[btn.Floor]int)
 					//q_floor = append(q_floor,btn.Floor)
 					//log.Println("Quetype: ",q_type)
@@ -262,11 +270,11 @@ func main() {
 					//log.Println("Quetype: ",q_type)
 				//log.Println("Quefloor: ",q_floor)
 					log.Println("1.etg DOWN")
-						gotoFloor(0)
+						gotoFloor(btn.Type , btn.Floor)
 
 					lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 
-					case 1: //2.etg
+					case SecondFloor: //2.etg
 					//q_type = append(q_type,btn.Type)//,[btn.Floor]int)
 					//q_floor = append(q_floor,btn.Floor)
 
@@ -275,11 +283,11 @@ func main() {
 				//	log.Println("Quetype: ",q_type)
 				//	log.Println("Quefloor: ",q_floor)
 					log.Println("2.etg DOWN")
-						gotoFloor(1)
+						gotoFloor(btn.Type , btn.Floor)
 					
 						lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 
-					case 2: //3.etg
+					case ThirdFloor: //3.etg
 					//q_type = append(q_type,btn.Type)//,[btn.Floor]int)
 					//q_floor = append(q_floor,btn.Floor)
 					//log.Println("Quetype: ",q_type)
@@ -287,11 +295,11 @@ func main() {
 					//log.Println("Quetype: ",q_type)
 					//log.Println("Quefloor: ",q_floor)
 					log.Println("3.etg DOWN")
-						gotoFloor(2)
+						gotoFloor(btn.Type , btn.Floor)
 					
 						lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 
-					case 3: //4.etg
+					case FourthFloor: //4.etg
 					//q_type = append(q_type,btn.Type)//,[btn.Floor]int)
 					//q_floor = append(q_floor,btn.Floor)
 					//log.Println("Quetype: ",q_type)
@@ -299,47 +307,47 @@ func main() {
 				//	log.Println("Quetype: ",q_type)
 					//log.Println("Quefloor: ",q_floor)
 					log.Println("4.etg DOWN")
-						gotoFloor(3)
+						gotoFloor(btn.Type , btn.Floor)
 
 						lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 					}
 					//---------------------------------------------Local button
-				case 2:
+				case LocalButton:
 				switch btn.Floor {
-					case 0: //1.etg
+					case FirstFloor: //1.etg
 				//	q_type = append(q_type,btn.Type)//,[btn.Floor]int)
 				//	q_floor = append(q_floor,btn.Floor)
 						log.Println("1.etg local")
 				//		log.Println("Quetype: ",q_type)
 				//	log.Println("Quefloor: ",q_floor)
-						 gotoFloor(0)
+						 gotoFloor(btn.Type , btn.Floor)
 
 						lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
-					case 1: //2.etg
+					case SecondFloor: //2.etg
 				//	q_type = append(q_type,btn.Type)//,[btn.Floor]int)
 				//	q_floor = append(q_floor,btn.Floor)
 				//	log.Println("Quetype: ",q_type)
 				//	log.Println("Quefloor: ",q_floor)
 					log.Println("2.etg local")
-						 gotoFloor(1)
+						gotoFloor(btn.Type , btn.Floor)
 						
 						lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
-					case 2: //3.etg
+					case ThirdFloor: //3.etg
 				//	q_type = append(q_type,btn.Type)//,[btn.Floor]int)
 				//	q_floor = append(q_floor,btn.Floor)
 				//	log.Println("Quetype: ",q_type)
 				//	log.Println("Quefloor: ",q_floor)
 					log.Println("3.etg local")
-						gotoFloor(2)
+						gotoFloor(btn.Type , btn.Floor)
 						
 						lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
-					case 3: //4.etg
+					case FourthFloor: //4.etg
 						log.Println("4.etg local")
 					//	q_type = append(q_type,btn.Type)//,[btn.Floor]int)
 					//q_floor = append(q_floor,btn.Floor)
 					//	log.Println("Quetype: ",q_type)
 					//log.Println("Quefloor: ",q_floor)
-						gotoFloor(3)
+						gotoFloor(btn.Type , btn.Floor)
 						
 						lightChannel <- elev.ElevLight{Type: btn.Type, Floor: btn.Floor, Active: false}
 					}

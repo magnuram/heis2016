@@ -2,7 +2,7 @@ package config
 
 
 
-const N_FLOORS int = 4
+const NumbrOfFloors int = 4
 
 //Motor commands
 const UP = 1
@@ -21,4 +21,17 @@ const (
 	INDICATOR_DOOR
 )
 
+//Buttons
+const(
+	UpButton = iota
+	DownButton 
+	LocalButton 
+)
 
+//Floors
+const(
+FirstFloor = iota
+SecondFloor
+ThirdFloor
+FourthFloor
+)
