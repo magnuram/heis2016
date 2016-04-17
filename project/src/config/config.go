@@ -16,7 +16,7 @@ const (
 	IndicatorFloor
 	ButtonStop   
 	SensorObst   
-	INDICATOR_DOOR
+	IndicatorDoor
 )
 
 //Buttons 

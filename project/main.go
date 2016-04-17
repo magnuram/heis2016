@@ -59,11 +59,13 @@ func main() {
 		time.Sleep(elevDelay)       //Times Elevator at right place
 		motorChannel <- STOP        // Stops any initial elevator movement
 		light.Active = true         // Makes "door open" light for all elevators active
-		light.Type = INDICATOR_DOOR // Describes
+		light.Type = IndicatorDoor // Describes
 		lightChannel <- light
+		
 		time.Sleep(openDoor)
 		light.Active = false
 		lightChannel <- light
+
 	}
 
 	gotoFloor := func(flr int) { //Makes the elevator go to the floor
