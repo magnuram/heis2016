@@ -39,8 +39,7 @@ func main() {
 		log.Println("Hardware init complete")
 	}
 
-	var floor = <-floorChannel
-	var light elev.ElevLight
+
 
 //----------Init simple kill channel
 	killChan := make(chan os.Signal)
@@ -53,12 +52,14 @@ func main() {
 		os.Exit(1)
 	}()
 
+	var floor = <-floorChannel
+	var light elev.ElevLight
 
 	doorCheck := func() {
 		time.Sleep(elevDelay)       //Times Elevator at right place
 		motorChannel <- STOP        // Stops any initial elevator movement
 		light.Active = true         // Makes "door open" light for all elevators active
-		light.Type = IndicatorDoor // Describes
+		light.Type = INDICATOR_DOOR // Describes
 		lightChannel <- light
 		time.Sleep(openDoor)
 		light.Active = false

@@ -14,9 +14,9 @@ const (
 	ButtonLocal
 	SensorFloor
 	IndicatorFloor
-	ButtonStop   //Doesn't use
-	SensorObst   //Doesn't use
-	IndicatorDoor
+	ButtonStop   
+	SensorObst   
+	INDICATOR_DOOR
 )
 
 //Buttons 

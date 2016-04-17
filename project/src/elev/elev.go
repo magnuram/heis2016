@@ -142,7 +142,7 @@ func lightController(lightChannel <-chan ElevLight) {
 				} else {
 					IoClearBit(lampChannelMatrix[cmd.Floor][cmd.Type])
 				}
-			case IndicatorDoor:
+			case INDICATOR_DOOR:
 				if cmd.Active {
 					IoSetBit(LIGHT_DOOR_OPEN)
 				} else {
