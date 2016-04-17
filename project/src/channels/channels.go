@@ -5,20 +5,20 @@ const (
 	//in port 4
 	PORT4           = 3
 	OBSTRUCTION     = (0x300 + 23)
-	STOP_BUTTON     = (0x300 + 22)
+	StopButton     = (0x300 + 22)
 	ButtonLocal1 = (0x300 + 21)
 	ButtonLocal2 = (0x300 + 20)
 	ButtonLocal3 = (0x300 + 19)
 	ButtonLocal4 = (0x300 + 18)
-	BUTTON_UP1      = (0x300 + 17)
-	BUTTON_UP2      = (0x300 + 16)
+	ButtonUp1      = (0x300 + 17)
+	ButtonUp2      = (0x300 + 16)
 
 	//in port 1
 	PORT1         = 2
-	BUTTON_DOWN2  = (0x200 + 0)
-	BUTTON_UP3    = (0x200 + 1)
-	BUTTON_DOWN3  = (0x200 + 2)
-	BUTTON_DOWN4  = (0x200 + 3)
+	ButtonDown2  = (0x200 + 0)
+	ButtonUp3    = (0x200 + 1)
+	ButtonDown3  = (0x200 + 2)
+	ButtonDown4  = (0x200 + 3)
 	SensorFloor1 = (0x200 + 4)
 	SensorFloor2 = (0x200 + 5)
 	SensorFloor3 = (0x200 + 6)
@@ -27,31 +27,31 @@ const (
 	//out port 3
 	PORT3          = 3
 	MOTORDIR       = (0x300 + 15)
-	LIGHT_STOP     = (0x300 + 14)
-	LIGHT_COMMAND1 = (0x300 + 13)
-	LIGHT_COMMAND2 = (0x300 + 12)
-	LIGHT_COMMAND3 = (0x300 + 11)
-	LIGHT_COMMAND4 = (0x300 + 10)
-	LIGHT_UP1      = (0x300 + 9)
-	LIGHT_UP2      = (0x300 + 8)
+	LightStop     = (0x300 + 14)
+	LightCommand1 = (0x300 + 13)
+	LightCommand2 = (0x300 + 12)
+	LightCommand3 = (0x300 + 11)
+	LightCommand4 = (0x300 + 10)
+	LightUp1      = (0x300 + 9)
+	LightUp2      = (0x300 + 8)
 
 	//out port 2
 	PORT2            = 3
-	LIGHT_DOWN2      = (0x300 + 7)
-	LIGHT_UP3        = (0x300 + 6)
-	LIGHT_DOWN3      = (0x300 + 5)
-	LIGHT_DOWN4      = (0x300 + 4)
-	LIGHT_DOOR_OPEN  = (0x300 + 3)
-	LIGHT_FLOOR_IND2 = (0x300 + 1)
-	LIGHT_FLOOR_IND1 = (0x300 + 0)
+	LightDown2      = (0x300 + 7)
+	LightUp3        = (0x300 + 6)
+	LightDown3      = (0x300 + 5)
+	LightDown4      = (0x300 + 4)
+	LightDoorOpen  = (0x300 + 3)
+	LightFloorInd2 = (0x300 + 1)
+	LightFloorInd1 = (0x300 + 0)
 
 	//out port 0
 	PORT0 = 1
 	MOTOR = (0x100 + 0)
 
 	//non-existing ports (for alignment)
-	BUTTON_DOWN1 = -1
-	BUTTON_UP4   = -1
-	LIGHT_DOWN1  = -1
-	LIGHT_UP4    = -1
+	ButtonDown1 = -1
+	ButtonUp4   = -1
+	LightDown1  = -1
+	LightUp4    = -1
 )

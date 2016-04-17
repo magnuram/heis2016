@@ -24,17 +24,17 @@ const maxSpeed int = 14
 const elevStopDelay = 50 * time.Millisecond
 
 var lampChannelMatrix = [NumbrOfFloors][3]int{
-	{LIGHT_UP1, LIGHT_DOWN1, LIGHT_COMMAND1},
-	{LIGHT_UP2, LIGHT_DOWN2, LIGHT_COMMAND2},
-	{LIGHT_UP3, LIGHT_DOWN3, LIGHT_COMMAND3},
-	{LIGHT_UP4, LIGHT_DOWN4, LIGHT_COMMAND4},
+	{LightUp1, LightDown1, LightCommand1},
+	{LightUp2, LightDown2, LightCommand2},
+	{LightUp3, LightDown3, LightCommand3},
+	{LightUp4, LightDown4, LightCommand4},
 }
 
 var buttonChannelMatrix = [NumbrOfFloors][3]int{
-	{BUTTON_UP1, BUTTON_DOWN1, ButtonLocal1},
-	{BUTTON_UP2, BUTTON_DOWN2, ButtonLocal2},
-	{BUTTON_UP3, BUTTON_DOWN3, ButtonLocal3},
-	{BUTTON_UP4, BUTTON_DOWN4, ButtonLocal4},
+	{ButtonUp1, ButtonDown1, ButtonLocal1},
+	{ButtonUp2, ButtonDown2, ButtonLocal2},
+	{ButtonUp3, ButtonDown3, ButtonLocal3},
+	{ButtonUp4, ButtonDown4, ButtonLocal4},
 }
 
 func ElevInit(buttonchannel chan<- ElevButton, lightChannel <-chan ElevLight, motorChannel chan int, floorChannel chan<- int, elevDelay time.Duration) error {
@@ -88,7 +88,7 @@ func readInput(buttonchannel chan<- ElevButton, elevDelay time.Duration) {
 				}
 			}
 		}
-		if IoReadBit(STOP_BUTTON) {
+		if IoReadBit(StopButton) {
 			if !stopbtn {
 				stopbtn = true
 				buttonchannel <- ElevButton{Type: ButtonStop}
@@ -132,9 +132,9 @@ func lightController(lightChannel <-chan ElevLight) {
 			switch cmd.Type {
 			case ButtonStop: //-------------Doesn't use
 				if cmd.Active {
-					IoSetBit(LIGHT_STOP)
+					IoSetBit(LightStop)
 				} else {
-					IoClearBit(LIGHT_STOP)
+					IoClearBit(LightStop)
 				}
 			case ButtonCallUp, ButtonCallDown, ButtonLocal:
 				if cmd.Active {
@@ -144,9 +144,9 @@ func lightController(lightChannel <-chan ElevLight) {
 				}
 			case IndicatorDoor:
 				if cmd.Active {
-					IoSetBit(LIGHT_DOOR_OPEN)
+					IoSetBit(LightDoorOpen)
 				} else {
-					IoClearBit(LIGHT_DOOR_OPEN)
+					IoClearBit(LightDoorOpen)
 				}
 			default:
 				log.Println("Elev: \t You tried to light a non light item")
@@ -179,14 +179,14 @@ func setFloorIndicator(floor int) {
 		log.Println("Elev: \t Tried to set the light indicator to under 0")
 	}
 	if floor&0x02 > 0 { 
-		IoSetBit(LIGHT_FLOOR_IND1)
+		IoSetBit(LightFloorInd1)
 	} else {
-		IoClearBit(LIGHT_FLOOR_IND1)
+		IoClearBit(LightFloorInd1)
 	}
 	if floor&0x01 > 0 { 
-		IoSetBit(LIGHT_FLOOR_IND2)
+		IoSetBit(LightFloorInd2)
 	} else {
-		IoClearBit(LIGHT_FLOOR_IND2)
+		IoClearBit(LightFloorInd2)
 	}
 }
 
@@ -198,9 +198,9 @@ func clearAlllights() {
 			IoClearBit(lampChannelMatrix[Floor][Type])
 		}
 	}
-	IoClearBit(LIGHT_DOOR_OPEN)
+	IoClearBit(LightDoorOpen)
 
-	IoClearBit(LIGHT_STOP)
+	IoClearBit(LightStop)
 
 }
 

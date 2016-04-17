@@ -17,10 +17,10 @@ int io_init(void) {
 
     int status = 0;
     for (int i = 0; i < 8; i++) {
-        status |= comedi_dio_config(it_g, PORT_1_SUBDEVICE, i + PORT_1_CHANNEL_OFFSET, PORT_1_DIRECTION);
-        status |= comedi_dio_config(it_g, PORT_2_SUBDEVICE, i + PORT_2_CHANNEL_OFFSET, PORT_2_DIRECTION);
-        status |= comedi_dio_config(it_g, PORT_3_SUBDEVICE, i + PORT_3_CHANNEL_OFFSET, PORT_3_DIRECTION);
-        status |= comedi_dio_config(it_g, PORT_4_SUBDEVICE, i + PORT_4_CHANNEL_OFFSET, PORT_4_DIRECTION);
+        status |= comedi_dio_config(it_g, Port1Subdevice, i + Port1ChannelOffset, Port1Direction);
+        status |= comedi_dio_config(it_g, Port2Subdevice, i + Port2ChannelOffset, Port2Direction);
+        status |= comedi_dio_config(it_g, Port3Subdevice, i + Port3ChannelOffset, Port3Direction);
+        status |= comedi_dio_config(it_g, Port4Subdevice, i + Port4ChannelOffset, Port4Direction);
     }
 
     return (status == 0);
