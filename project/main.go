@@ -143,8 +143,9 @@ func main() {
 		} else if floor < flr {
 			motorChannel <- UP
 		}
-		for floor != flr {
+		for floor != flr {			//Elevator mooving
 			floor = <-floorChannel
+			
 		}
 
 		 doorCheck()
