@@ -7,10 +7,10 @@
 #define PORT_4_DIRECTION        COMEDI_INPUT
 #define OBSTRUCTION             (0x300+23)
 #define STOP                    (0x300+22)
-#define BUTTON_COMMAND1         (0x300+21)
-#define BUTTON_COMMAND2         (0x300+20)
-#define BUTTON_COMMAND3         (0x300+19)
-#define BUTTON_COMMAND4         (0x300+18)
+#define ButtonLocal1         (0x300+21)
+#define ButtonLocal2         (0x300+20)
+#define ButtonLocal3         (0x300+19)
+#define ButtonLocal4         (0x300+18)
 #define BUTTON_UP1              (0x300+17)
 #define BUTTON_UP2              (0x300+16)
 
@@ -22,10 +22,10 @@
 #define BUTTON_UP3              (0x200+1)
 #define BUTTON_DOWN3            (0x200+2)
 #define BUTTON_DOWN4            (0x200+3)
-#define SENSOR_FLOOR1           (0x200+4)
-#define SENSOR_FLOOR2           (0x200+5)
-#define SENSOR_FLOOR3           (0x200+6)
-#define SENSOR_FLOOR4           (0x200+7)
+#define SensorFloor1           (0x200+4)
+#define SensorFloor2           (0x200+5)
+#define SensorFloor3           (0x200+6)
+#define SensorFloor4           (0x200+7)
 
 //out port 3
 #define PORT_3_SUBDEVICE        3

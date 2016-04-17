@@ -6,10 +6,10 @@ const (
 	PORT4           = 3
 	OBSTRUCTION     = (0x300 + 23)
 	STOP_BUTTON     = (0x300 + 22)
-	BUTTON_COMMAND1 = (0x300 + 21)
-	BUTTON_COMMAND2 = (0x300 + 20)
-	BUTTON_COMMAND3 = (0x300 + 19)
-	BUTTON_COMMAND4 = (0x300 + 18)
+	ButtonLocal1 = (0x300 + 21)
+	ButtonLocal2 = (0x300 + 20)
+	ButtonLocal3 = (0x300 + 19)
+	ButtonLocal4 = (0x300 + 18)
 	BUTTON_UP1      = (0x300 + 17)
 	BUTTON_UP2      = (0x300 + 16)
 
@@ -19,10 +19,10 @@ const (
 	BUTTON_UP3    = (0x200 + 1)
 	BUTTON_DOWN3  = (0x200 + 2)
 	BUTTON_DOWN4  = (0x200 + 3)
-	SENSOR_FLOOR1 = (0x200 + 4)
-	SENSOR_FLOOR2 = (0x200 + 5)
-	SENSOR_FLOOR3 = (0x200 + 6)
-	SENSOR_FLOOR4 = (0x200 + 7)
+	SensorFloor1 = (0x200 + 4)
+	SensorFloor2 = (0x200 + 5)
+	SensorFloor3 = (0x200 + 6)
+	SensorFloor4 = (0x200 + 7)
 
 	//out port 3
 	PORT3          = 3

@@ -1,7 +1,5 @@
 package config
 
-
-
 const NumbrOfFloors int = 4
 
 //Motor commands
@@ -11,17 +9,17 @@ const DOWN = -1
 
 //Enumerator
 const (
-	BUTTON_CALL_UP = iota
-	BUTTON_CALL_DOWN
-	BUTTON_COMMAND
-	SENSOR_FLOOR
-	INDICATOR_FLOOR
-	BUTTON_STOP
-	SENSOR_OBST
-	INDICATOR_DOOR
+	ButtonCallUp = iota
+	ButtonCallDown
+	ButtonLocal
+	SensorFloor
+	IndicatorFloor
+	ButtonStop   //Doesn't use
+	SensorObst   //Doesn't use
+	IndicatorDoor
 )
 
-//Buttons
+//Buttons 
 const(
 	UpButton = iota
 	DownButton 
